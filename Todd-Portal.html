@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Todd's Portal"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>Todd's Learning Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink:#1a3a2a;--parchment:#f0faf4;--parchment-mid:#d6f0e0;
+    --gold:#2a7a4a;--gold-light:#3a9a60;--forest:#145a30;
+    --slate:#2a4a3a;--cream:#f4fdf6;--shadow:rgba(20,60,35,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{background:#e8f5ed;font-family:'Lato',sans-serif;color:var(--ink);min-height:100vh;-webkit-text-size-adjust:100%}
+
+  /* HERO */
+  .hero{background:linear-gradient(160deg,#0f2d1a 0%,#1a4a2a 60%,#0f2d1a 100%);padding:clamp(32px,6vw,56px) clamp(20px,5vw,40px) clamp(28px,5vw,48px);text-align:center;position:relative;overflow:hidden;border-bottom:2px solid #3a9a60;padding-top:calc(clamp(32px,6vw,56px) + env(safe-area-inset-top))}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(42,122,74,0.18) 0%,transparent 70%);pointer-events:none}
+  .hero-eyebrow{font-family:monospace;font-size:11px;letter-spacing:0.25em;color:#8adba8;text-transform:uppercase;margin-bottom:14px;position:relative}
+  .hero h1{font-family:'Playfair Display',serif;font-size:clamp(24px,6vw,48px);font-weight:400;color:var(--parchment);line-height:1.2;margin-bottom:12px;position:relative}
+  .hero h1 em{font-style:italic;color:#8adba8}
+  .hero-sub{font-size:clamp(13px,3vw,15px);color:rgba(200,240,215,0.7);font-weight:300;position:relative}
+
+  /* LANDING PAGE */
+  #page-landing{display:block}
+  #page-tools{display:none}
+
+  .landing-wrap{max-width:600px;margin:0 auto;padding:clamp(32px,5vw,60px) clamp(16px,4vw,24px)}
+  .landing-date{text-align:center;font-family:monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(26,58,42,0.45);margin-bottom:clamp(28px,5vw,48px)}
+
+  /* BIG BUTTONS — touch friendly */
+  .big-btn{display:flex;flex-direction:column;gap:8px;background:#fff;border:1px solid rgba(42,122,74,0.25);border-radius:14px;padding:clamp(20px,4vw,28px) clamp(20px,4vw,32px);text-decoration:none;color:inherit;transition:all 0.2s;cursor:pointer;width:100%;text-align:left;font-family:'Lato',sans-serif;margin-bottom:16px;min-height:88px;-webkit-appearance:none}
+  .big-btn:active{transform:scale(0.98);opacity:0.9}
+  @media(hover:hover){.big-btn:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 10px 32px rgba(20,90,48,0.15)}}
+  .big-btn-inner{display:flex;align-items:center;gap:clamp(12px,3vw,18px)}
+  .big-btn-icon{font-size:clamp(28px,6vw,36px);flex-shrink:0}
+  .big-btn-label{font-family:'Playfair Display',serif;font-size:clamp(18px,4vw,22px);font-weight:400;color:var(--ink);line-height:1.2;margin-bottom:4px}
+  .big-btn-desc{font-size:clamp(12px,2.5vw,13px);color:rgba(26,58,42,0.6);line-height:1.6}
+  .big-btn-arrow{margin-left:auto;font-size:20px;color:var(--gold);opacity:1;align-self:center;flex-shrink:0}
+
+  .btn-hub{background:linear-gradient(135deg,#0f2d1a,#1a4a2a);border-color:#3a9a60}
+  .btn-hub .big-btn-label{color:#f0faf4}
+  .btn-hub .big-btn-desc{color:rgba(200,240,215,0.65)}
+  .btn-hub .big-btn-arrow{color:#8adba8}
+  .btn-hub:active{opacity:0.85}
+
+  /* ALL TOOLS PAGE */
+  .tools-header{background:linear-gradient(160deg,#0f2d1a 0%,#1a4a2a 100%);padding:clamp(14px,3vw,18px) clamp(16px,4vw,28px);padding-top:calc(clamp(14px,3vw,18px) + env(safe-area-inset-top));display:flex;align-items:center;gap:16px;border-bottom:2px solid #3a9a60;position:sticky;top:0;z-index:100}
+  .tools-back{background:none;border:1px solid rgba(138,219,168,0.4);color:#8adba8;padding:10px 18px;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:6px;transition:all 0.2s;min-height:44px;min-width:44px;-webkit-appearance:none}
+  .tools-back:active{background:rgba(138,219,168,0.2)}
+  .tools-title{font-family:'Playfair Display',serif;font-size:clamp(16px,3vw,18px);color:#f0faf4;font-weight:400}
+
+  .main{max-width:900px;margin:0 auto;padding:clamp(20px,4vw,28px) clamp(16px,3vw,24px) 80px}
+  .category{margin-bottom:36px}
+  .category-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(42,122,74,0.3)}
+  .category-icon{font-size:20px}
+  .category-title{font-family:'Playfair Display',serif;font-size:clamp(17px,3vw,20px);font-weight:400;color:#1a3a2a}
+  .category-count{font-family:monospace;font-size:10px;color:rgba(26,58,42,0.45);margin-left:auto;letter-spacing:0.1em}
+
+  /* CARDS — single column on mobile, grid on tablet+ */
+  .cards{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:540px){.cards{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}}
+
+  .card{background:#fff;border:1px solid rgba(42,122,74,0.2);border-radius:10px;padding:16px 18px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:6px;transition:border-color 0.2s,box-shadow 0.2s;cursor:pointer;min-height:44px}
+  .card:active{background:#f4fdf6;border-color:#2a7a4a}
+  @media(hover:hover){.card:hover{border-color:#2a7a4a;transform:translateY(-2px);box-shadow:0 8px 24px rgba(20,90,48,0.15)}}
+  .card-type{font-family:monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;padding:2px 8px;border-radius:3px;display:inline-block;width:fit-content;margin-bottom:2px}
+  .type-local{background:rgba(42,122,74,0.12);color:#145a30}
+  .type-claude{background:rgba(42,80,168,0.1);color:#2a3a8a}
+  .card-title{font-family:'Playfair Display',serif;font-size:clamp(15px,3vw,16px);font-weight:400;color:#1a3a2a;line-height:1.3}
+  .card-desc{font-size:12px;color:rgba(26,58,42,0.65);line-height:1.6;flex:1}
+  .card-arrow{font-size:14px;color:#2a7a4a;align-self:flex-end;margin-top:4px}
+  .card.placeholder{border-style:dashed;border-color:rgba(42,122,74,0.25);opacity:0.5;cursor:default}
+  .card.placeholder:active{background:#fff;border-color:rgba(42,122,74,0.25)}
+
+  footer{text-align:center;padding:clamp(20px,4vw,28px);padding-bottom:calc(clamp(20px,4vw,28px) + env(safe-area-inset-bottom));font-family:monospace;font-size:11px;color:rgba(26,58,42,0.4);border-top:1px solid rgba(42,122,74,0.15)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ LANDING PAGE ═══════════════════════════════ -->
+<div id="page-landing">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Personal Learning Hub</div>
+    <h1>Todd's <em>AI Tools</em> Portal</h1>
+    <p class="hero-sub">All your Claude-built tools in one place</p>
+  </div>
+
+  <div class="landing-wrap">
+    <div class="landing-date" id="landing-date"></div>
+
+    <!-- KNOWLEDGE HUB BUTTON -->
+    <a href="./todds-knowledge-hub.html" class="big-btn btn-hub" onclick="this.href='./todds-knowledge-hub.html'">
+      <div class="big-btn-inner">
+        <div class="big-btn-icon">🧠</div>
+        <div class="big-btn-text">
+          <div class="big-btn-label">Todd's Knowledge Hub</div>
+          <div class="big-btn-desc">Knowledge Curator &nbsp;·&nbsp; Journal Assistant &nbsp;·&nbsp; Book Library — your daily thinking and capture tools</div>
+        </div>
+        <div class="big-btn-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- ALL TOOLS BUTTON -->
+    <button class="big-btn" onclick="showTools()">
+      <div class="big-btn-inner">
+        <div class="big-btn-icon">🗂️</div>
+        <div class="big-btn-text">
+          <div class="big-btn-label">All Tools</div>
+          <div class="big-btn-desc">Historical Maps &nbsp;·&nbsp; AI Fluency &nbsp;·&nbsp; Personal &amp; Faith &nbsp;·&nbsp; Family &nbsp;·&nbsp; Art History — all your resources by category</div>
+        </div>
+        <div class="big-btn-arrow">→</div>
+      </div>
+    </button>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ ALL TOOLS PAGE ════════════════════════════ -->
+<div id="page-tools">
+
+  <div class="tools-header">
+    <button class="tools-back" onclick="showLanding()">← Back</button>
+    <span class="tools-title">All Tools</span>
+  </div>
+
+  <div class="main">
+
+    <!-- HISTORICAL MAPS -->
+    <div class="category">
+      <div class="category-header">
+        <span class="category-icon">🗺️</span>
+        <span class="category-title">Historical Maps &amp; Cartography</span>
+        <span class="category-count">10 TOOLS</span>
+      </div>
+      <div class="cards">
+
+        <a href="cartographica_portal.html" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Cartographica Portal</span>
+          <span class="card-desc">Your main map study portal with tabs for all 9 historical maps in your independent study program.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="https://claude.ai/chat/a76212b7-ecd0-4983-b765-b2511ea21adb" class="card">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">Historical Maps Independent Study Program</span>
+          <span class="card-desc">Week-long independent study program exploring nine historically significant maps with activity cards and facilitator guides.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="lines_of_power.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Lines of Power — Print Edition</span>
+          <span class="card-desc">Print-ready exhibition guide for the Lines of Power historical maps series.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="cantino_activity_cards.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Cantino Planisphere — Activity Cards</span>
+          <span class="card-desc">Three-tier activity cards (Easy, Medium, Difficult) for the Cantino Planisphere (1502), including the deep-dive Claude prompt.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="cantino_facilitator_guide.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Cantino Planisphere — Facilitator Guide</span>
+          <span class="card-desc">Pre-session prep guide for the Cantino Planisphere — visual elements, tier-by-tier notes, and recommended resources.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="hereford_activity_cards.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Hereford Mappa Mundi — Activity Cards</span>
+          <span class="card-desc">Three-tier activity cards for the Hereford Mappa Mundi (c. 1300), including the theology of geography deep-dive prompt.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="hereford_facilitator_guide.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Hereford Mappa Mundi — Facilitator Guide</span>
+          <span class="card-desc">Pre-session prep guide for the Hereford Mappa Mundi — T-O structure, monstrous races, and tier-by-tier facilitation notes.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="historical_maps_guide.docx.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Historical Maps Guide — Vol. 1</span>
+          <span class="card-desc">Reference guide covering foundational historical maps and cartographic history.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="historical_maps_vol2.docx.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Historical Maps Guide — Vol. 2</span>
+          <span class="card-desc">Second volume of the historical maps reference guide series.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="historical_maps_vol3.docx.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Historical Maps Guide — Vol. 3</span>
+          <span class="card-desc">Third volume of the historical maps reference guide series.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="Maphead_Book_Study.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Maphead Book Study</span>
+          <span class="card-desc">Book study guide for Maphead by Ken Jennings — connections to your nine-map curriculum and cartographic curiosity.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- AI FLUENCY -->
+    <div class="category">
+      <div class="category-header">
+        <span class="category-icon">🧠</span>
+        <span class="category-title">AI Fluency &amp; Education</span>
+        <span class="category-count">5 TOOLS</span>
+      </div>
+      <div class="cards">
+
+        <a href="https://claude.ai/public/artifacts/0d37c459-01b3-4a05-ba82-535b6f35e481" class="card">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">Travel Tool</span>
+          <span class="card-desc">Research any destination with curated sections — history, art museums, architecture, things to do, where to eat, coffee shops, bookstores, and travel cautions. Exports as a PDF travel guide.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="https://claude.ai/public/artifacts/c7041c97-d8fd-4c29-b2e9-4c8fa2063ac3" class="card">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">AI Learning Session Generator</span>
+          <span class="card-desc">Generates personalised 30–60 min learning sessions using the Anthropic 4D Framework for any topic.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="Claude_AI_Teammate_Guide.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Claude AI Teammate Guide</span>
+          <span class="card-desc">Practical guide to using Claude as a true AI teammate — features, workflows, and retired learner use cases.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="Learning-Claude-Session-Guide.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Learning Claude Session Guide</span>
+          <span class="card-desc">Session-by-session guide for mastering Claude — structured learning path from beginner to daily partner.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="Todd_Claude_Mastery_21Day_Complete_Program.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Claude Mastery — 21 Day Complete Program</span>
+          <span class="card-desc">The complete 21-day Claude mastery program covering Memory, Projects, Artifacts, CoWork, Claude Code, and AI Agents.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- PERSONAL & FAITH -->
+    <div class="category">
+      <div class="category-header">
+        <span class="category-icon">✝️</span>
+        <span class="category-title">Personal &amp; Faith</span>
+        <span class="category-count">2 TOOLS</span>
+      </div>
+      <div class="cards">
+
+        <a href="https://claude.ai/chat/28586792-f01d-45ee-ad22-2449a5fe2eae" class="card">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">Bible Book Discussion Guide</span>
+          <span class="card-desc">Weekly chapter discussion guide for your men's reading group — takeaways, application questions, and a Big Audacious Goal.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="https://claude.ai/chat/fd645067-3774-47fe-83b9-bbdc4b667e34" class="card">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">Claude Insights — March 2026</span>
+          <span class="card-desc">Personal usage analysis — how you use Claude, your patterns, signatures, and what the data suggests about your learning journey.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- FAMILY -->
+    <div class="category">
+      <div class="category-header">
+        <span class="category-icon">👧</span>
+        <span class="category-title">Family</span>
+        <span class="category-count">3 TOOLS</span>
+      </div>
+      <div class="cards">
+
+        <a href="YOUR-CLAUDE-CHAT-URL-HERE" class="card">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">Granddaughter Summer Camp</span>
+          <span class="card-desc">Week-long personalized learning camp with 5 themed days, activity cards, facilitator guide, and service projects.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="grandpas_summer_camp.pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Grandpa's Summer Learning Camp</span>
+          <span class="card-desc">Complete 5-day camp guide — facilitator notes and activity cards for all days, including daily service projects.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="grandpas_summer_camp.html" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Grandpa's Summer Camp — Interactive</span>
+          <span class="card-desc">Interactive HTML version of the full camp guide — tabbed navigation, expandable missions, and checkbox progress tracking.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ART HISTORY -->
+    <div class="category">
+      <div class="category-header">
+        <span class="category-icon">🎨</span>
+        <span class="category-title">Art History</span>
+        <span class="category-count">2 TOOLS</span>
+      </div>
+      <div class="cards">
+
+        <a href="https://claude.ai/public/artifacts/b021b066-2f58-4f91-a875-afcb78838dc7" class="card">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">Art Analysis</span>
+          <span class="card-desc">Interactive art analysis tool — explore and interpret works of art with Claude as your guide.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a href="Raphael_7Day_Learning_Plan (1).pdf" class="card">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Raphael — 7 Day Learning Plan</span>
+          <span class="card-desc">A structured seven-day independent study plan exploring the life, work, and legacy of Raphael.</span>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ADD YOUR OWN -->
+    <div class="category">
+      <div class="category-header">
+        <span class="category-icon">＋</span>
+        <span class="category-title">Add Your Own</span>
+        <span class="category-count">PLACEHOLDER</span>
+      </div>
+      <div class="cards">
+        <div class="card placeholder">
+          <span class="card-type type-local">Local File</span>
+          <span class="card-title">Your Next Tool</span>
+          <span class="card-desc">Copy one of the card blocks in the HTML and paste it here. Replace the href, title, and description.</span>
+        </div>
+        <div class="card placeholder">
+          <span class="card-type type-claude">Claude Chat</span>
+          <span class="card-title">Your Next Tool</span>
+          <span class="card-desc">Copy one of the card blocks in the HTML and paste it here. Replace the href, title, and description.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>Todd's Learning Portal &nbsp;·&nbsp; Built with Claude &nbsp;·&nbsp; Last updated: April 2026</footer>
+
+</div>
+
+<script>
+document.getElementById('landing-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+function showTools(){
+  document.getElementById('page-landing').style.display='none';
+  document.getElementById('page-tools').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function showLanding(){
+  document.getElementById('page-tools').style.display='none';
+  document.getElementById('page-landing').style.display='block';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>

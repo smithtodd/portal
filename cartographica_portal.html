@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartographica — Historical Maps Study Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1e1000;
+    --parchment: #f7edcf;
+    --parchment-mid: #edd9a4;
+    --parchment-dark: #d4bc7a;
+    --gold: #b8840a;
+    --gold-bright: #d4a020;
+    --gold-dim: #8a6418;
+    --crimson: #8b1a1a;
+    --deep-blue: #1a3a5c;
+    --sea-blue: #2260a0;
+    --teal: #1a5c4a;
+    --gem-purple: #5a1e8e;
+    --gem-purple-bright: #8840cc;
+    /* Home/card backgrounds - warm parchment tones */
+    --home-bg: #c8a86a;
+    --card-bg: #e8d4a0;
+    --card-border: #b09050;
+    --section-bg: #d4b878;
+    /* Gem page backgrounds - lightened purple */
+    --gem-bg: #3c1e60;
+    --gem-card-bg: #4e2878;
+    --gem-card-border: #8840cc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'EB Garamond', Georgia, serif;
+    background: var(--home-bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ── TOP NAV ──────────────────────────────────────────────── */
+  #top-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: #3a2206;
+    border-bottom: 2px solid var(--gold-dim);
+    height: 50px;
+    display: flex; align-items: center;
+    padding: 0 16px; gap: 0;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  #top-nav::-webkit-scrollbar { display: none; }
+
+  .nav-logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 12px; color: var(--gold-bright);
+    white-space: nowrap; padding-right: 16px; margin-right: 8px;
+    border-right: 1px solid var(--gold-dim);
+    cursor: pointer; flex-shrink: 0; letter-spacing: 0.05em;
+  }
+  .nav-logo:hover { color: #f0c840; }
+
+  .nav-section-label {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.2em; color: #c09040;
+    text-transform: uppercase; padding: 0 10px 0 14px;
+    white-space: nowrap; flex-shrink: 0;
+    border-left: 1px solid #6a4010;
+  }
+
+  .nav-btn {
+    font-family: 'Cinzel', serif; font-size: 10px; color: #e8c878;
+    background: none; border: none; padding: 5px 9px;
+    cursor: pointer; white-space: nowrap; letter-spacing: 0.03em;
+    transition: color 0.18s, background 0.18s;
+    border-radius: 3px; flex-shrink: 0;
+  }
+  .nav-btn:hover { color: #f0c840; background: rgba(200,150,12,0.15); }
+  .nav-btn.active { color: #f0c840; background: rgba(200,150,12,0.2); }
+
+  .nav-gem-btn {
+    font-family: 'Cinzel', serif; font-size: 10px; color: #d0a0ff;
+    background: none; border: none; padding: 5px 9px;
+    cursor: pointer; white-space: nowrap; letter-spacing: 0.03em;
+    transition: color 0.18s, background 0.18s;
+    border-radius: 3px; flex-shrink: 0;
+  }
+  .nav-gem-btn:hover { color: #e8c0ff; background: rgba(136,64,204,0.15); }
+  .nav-gem-btn.active { color: #e8c0ff; background: rgba(136,64,204,0.2); }
+
+  /* ── HOME PAGE ────────────────────────────────────────────── */
+  #home { background: var(--home-bg); padding-top: 50px; }
+
+  .hero {
+    position: relative; min-height: 88vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    overflow: hidden; padding: 80px 40px 60px; text-align: center;
+    background: linear-gradient(160deg, #7a5010 0%, #5a3808 50%, #3a2206 100%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(200,150,12,0.06) 59px, rgba(200,150,12,0.06) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(200,150,12,0.06) 59px, rgba(200,150,12,0.06) 60px);
+    animation: gridDrift 40s linear infinite;
+  }
+  @keyframes gridDrift { from { transform: translate(0,0); } to { transform: translate(60px,60px); } }
+
+  .hero-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(200,150,12,0.12) 0%, transparent 70%);
+  }
+
+  .compass-rose {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: min(85vw,680px); height: min(85vw,680px);
+    opacity: 0.06; animation: roseRotate 120s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes roseRotate { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+  .hero-content { position: relative; z-index: 2; max-width: 860px; }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif; font-size: clamp(9px,1.3vw,12px);
+    letter-spacing: 0.32em; color: var(--gold-bright);
+    text-transform: uppercase; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    animation: fadeUp 0.9s ease 0.1s both;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: ''; width: 50px; height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-bright));
+  }
+  .hero-eyebrow::after { background: linear-gradient(to left, transparent, var(--gold-bright)); }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(38px,8.5vw,90px); font-weight: 900;
+    color: #fff8e8; line-height: 1.0; letter-spacing: 0.02em;
+    text-shadow: 0 0 80px rgba(200,150,12,0.3), 0 4px 20px rgba(0,0,0,0.8);
+    margin-bottom: 14px; animation: fadeUp 0.9s ease 0.25s both;
+  }
+
+  .hero-subtitle {
+    font-family: 'Cinzel', serif; font-size: clamp(13px,2.2vw,20px);
+    color: var(--gold-bright); letter-spacing: 0.14em;
+    text-transform: uppercase; margin-bottom: 28px;
+    animation: fadeUp 0.9s ease 0.4s both;
+  }
+
+  .hero-desc {
+    font-family: 'EB Garamond', serif; font-size: clamp(16px,1.9vw,19px);
+    color: #e0c888; line-height: 1.75; max-width: 660px;
+    margin: 0 auto 50px; font-style: italic;
+    animation: fadeUp 0.9s ease 0.55s both;
+  }
+
+  .hero-rule {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    margin-bottom: 50px; animation: fadeUp 0.9s ease 0.6s both;
+  }
+  .hero-rule-line { flex: 1; max-width: 180px; height: 1px; background: linear-gradient(to right, transparent, var(--gold-bright), transparent); }
+  .hero-rule-diamond { color: var(--gold-bright); font-size: 18px; }
+
+  /* ── PORTAL SECTIONS (light parchment background) ────────── */
+  .portal-sections {
+    background: var(--home-bg);
+    max-width: 100%;
+    padding: 40px 36px 80px;
+    animation: fadeUp 0.9s ease 0.7s both;
+  }
+  .portal-sections-inner { max-width: 1380px; margin: 0 auto; }
+
+  .section-block { margin-bottom: 60px; }
+
+  .section-block-header {
+    display: flex; align-items: center; gap: 20px;
+    margin-bottom: 28px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--gold-dim);
+  }
+  .section-block-title {
+    font-family: 'Cinzel', serif; font-size: clamp(15px,2vw,22px);
+    color: #3a2206; letter-spacing: 0.07em; white-space: nowrap;
+  }
+  .section-block-count {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    color: var(--gold-dim); letter-spacing: 0.15em;
+    padding: 3px 10px; border: 1px solid var(--gold-dim);
+    border-radius: 20px;
+  }
+
+  /* ── MAP CARDS ──────────────────────────────────────────── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+    gap: 16px;
+  }
+
+  .map-card {
+    background: #efe4be;
+    border: 1px solid var(--card-border);
+    border-top: 3px solid var(--gold-dim);
+    border-radius: 3px; padding: 20px 18px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .map-card:hover {
+    border-color: var(--gold); transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(90,56,0,0.18);
+  }
+
+  .card-badge {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.16em; color: var(--gold-dim);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif; font-size: 13px;
+    color: #2a1600; line-height: 1.4; margin-bottom: 7px;
+  }
+  .card-meta {
+    font-family: 'EB Garamond', serif; font-size: 13px;
+    color: #7a5028; font-style: italic;
+    margin-bottom: 12px; line-height: 1.4;
+  }
+  .card-cta {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 0.1em; color: var(--gold);
+  }
+
+  /* ── GEM CARDS (on home page) ────────────────────────────── */
+  .gem-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px,1fr));
+    gap: 20px;
+  }
+
+  .gem-card {
+    background: #ece0f4;
+    border: 1px solid #9060c0;
+    border-top: 3px solid var(--gem-purple-bright);
+    border-radius: 4px; padding: 28px 26px 24px;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .gem-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(88,40,140,0.2);
+  }
+
+  .gem-eyebrow {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.22em; color: var(--gem-purple);
+    text-transform: uppercase; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .gem-eyebrow::before { content: '✦'; font-size: 8px; }
+
+  .gem-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(16px,2vw,20px); color: #3a0e6e;
+    margin-bottom: 10px; line-height: 1.25;
+  }
+
+  .gem-desc {
+    font-family: 'EB Garamond', serif; font-size: 16px;
+    color: #4a2070; line-height: 1.7; margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .gem-how {
+    background: rgba(136,64,204,0.08);
+    border: 1px solid rgba(136,64,204,0.25);
+    border-radius: 3px; padding: 14px 16px; margin-bottom: 20px;
+  }
+  .gem-how-label {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.2em; color: var(--gem-purple);
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .gem-how-text {
+    font-family: 'EB Garamond', serif; font-size: 14px;
+    color: #4a2070; line-height: 1.6;
+  }
+
+  .gem-launch-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Cinzel', serif; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #fff; background: var(--gem-purple);
+    border: 1px solid var(--gem-purple-bright);
+    padding: 12px 22px; border-radius: 3px;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.2s; width: 100%; justify-content: center;
+  }
+  .gem-launch-btn:hover { background: var(--gem-purple-bright); }
+  .gem-launch-icon { font-size: 16px; }
+
+  /* ── LOCAL FILE CARDS ──────────────────────────────────── */
+  .local-card {
+    background: #daf0e4;
+    border: 1px solid #4a9060;
+    border-top: 3px solid #2e7a50;
+    border-radius: 4px; padding: 28px 26px 24px;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .local-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(30,90,60,0.2);
+  }
+
+  .local-eyebrow {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.22em; color: #1e6040;
+    text-transform: uppercase; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .local-eyebrow::before { content: '◈'; font-size: 10px; }
+
+  .local-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(15px,1.8vw,18px); color: #0e3c22;
+    margin-bottom: 10px; line-height: 1.3;
+  }
+  .local-desc {
+    font-family: 'EB Garamond', serif; font-size: 16px;
+    color: #1e5030; line-height: 1.7; margin-bottom: 20px; font-style: italic;
+  }
+  .local-launch-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Cinzel', serif; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #fff; background: #2e7a50;
+    border: 1px solid #1e6040; padding: 12px 22px;
+    border-radius: 3px; cursor: pointer; text-decoration: none;
+    transition: background 0.2s; width: 100%; justify-content: center;
+  }
+  .local-launch-btn:hover { background: #1e6040; }
+
+  /* ── MAP CONTENT PAGE (parchment) ──────────────────────── */
+  .map-page { background: var(--parchment); padding-top: 50px; min-height: 100vh; }
+
+  .map-page-header {
+    background: linear-gradient(135deg, #4a3008, #2e1e04);
+    padding: 44px 56px 36px;
+    border-bottom: 2px solid var(--gold-dim);
+    position: relative; overflow: hidden;
+  }
+  .map-page-header::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 75% 50%, rgba(200,150,12,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .map-page-vol {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 0.28em; color: var(--gold-dim);
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .map-page-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(20px,3.8vw,42px); color: #fff8e8; line-height: 1.15; margin-bottom: 7px;
+  }
+  .map-page-sub {
+    font-family: 'Cinzel', serif; font-size: clamp(12px,1.6vw,17px);
+    color: var(--gold-bright); font-weight: 400; letter-spacing: 0.06em;
+  }
+
+  .map-page-body { max-width: 980px; margin: 0 auto; padding: 44px 40px 80px; }
+
+  .section-heading {
+    font-family: 'Cinzel', serif; font-size: 11px;
+    letter-spacing: 0.24em; color: var(--crimson);
+    text-transform: uppercase; margin: 36px 0 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-heading::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--crimson), transparent); }
+
+  .bio-box {
+    background: linear-gradient(135deg, #ede0b8, #ddd0a0);
+    border: 1px solid var(--parchment-dark);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 3px 3px 0;
+    padding: 22px 26px; font-size: 16.5px; line-height: 1.78; color: #1e1000;
+  }
+
+  .facts-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .facts-list li {
+    background: #fdf6e4; border: 1px solid #d8be80;
+    border-radius: 3px; padding: 14px 18px 14px 42px;
+    font-size: 15.5px; line-height: 1.72; color: #1a0e00; position: relative;
+  }
+  .facts-list li::before {
+    content: '◆'; position: absolute; left: 14px; top: 16px;
+    color: var(--gold); font-size: 9px;
+  }
+
+  .poi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px,1fr));
+    gap: 16px;
+  }
+  .poi-card {
+    background: #fdf6e4; border: 1px solid #d8be80;
+    border-top: 3px solid var(--deep-blue);
+    border-radius: 0 0 3px 3px; padding: 18px 20px;
+  }
+  .poi-label {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.2em; color: var(--deep-blue);
+    text-transform: uppercase; margin-bottom: 5px;
+  }
+  .poi-title {
+    font-family: 'Cinzel', serif; font-size: 13px;
+    color: var(--ink); margin-bottom: 9px; line-height: 1.35;
+  }
+  .poi-lookfor {
+    font-family: 'EB Garamond', serif; font-size: 14.5px;
+    font-style: italic; color: var(--crimson);
+    background: rgba(139,26,26,0.055);
+    border-left: 3px solid var(--crimson);
+    padding: 7px 11px; margin-bottom: 9px;
+    line-height: 1.55; border-radius: 0 2px 2px 0;
+  }
+  .poi-body { font-family: 'EB Garamond', serif; font-size: 14.5px; color: #221200; line-height: 1.72; }
+
+  .links-box {
+    background: linear-gradient(135deg, #e6f0fa, #d0e4f6);
+    border: 1px solid #a0c4e8;
+    border-left: 4px solid var(--sea-blue);
+    border-radius: 0 3px 3px 0; padding: 18px 22px; margin-top: 28px;
+  }
+  .links-box h4 {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 0.2em; color: var(--deep-blue);
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .link-entry { margin-bottom: 10px; }
+  .link-label {
+    display: block; font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 0.1em;
+    color: var(--deep-blue); text-transform: uppercase; margin-bottom: 2px;
+  }
+  .links-box a {
+    font-family: 'EB Garamond', serif; font-size: 14.5px;
+    color: var(--sea-blue); text-decoration: none; word-break: break-all;
+  }
+  .links-box a:hover { text-decoration: underline; }
+
+  /* ── MAP FOOTER NAV ──────────────────────────────────────── */
+  .map-nav-footer {
+    background: #3a2206; border-top: 1px solid var(--gold-dim);
+    padding: 20px 56px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .map-nav-btn {
+    font-family: 'Cinzel', serif; font-size: 11px;
+    letter-spacing: 0.1em; color: var(--gold-bright);
+    background: none; border: 1px solid var(--gold-dim);
+    padding: 9px 18px; cursor: pointer;
+    transition: all 0.18s; border-radius: 2px;
+    max-width: 260px; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .map-nav-btn:hover { background: rgba(200,150,12,0.15); border-color: var(--gold-bright); }
+  .map-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .map-nav-home {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 0.16em; color: #c0a060;
+    background: none; border: none; cursor: pointer;
+    text-transform: uppercase; transition: color 0.18s;
+  }
+  .map-nav-home:hover { color: var(--gold-bright); }
+
+  /* ── GEM LAUNCH PAGES ────────────────────────────────────── */
+  .gem-page { background: #f0e8fa; padding-top: 50px; min-height: 100vh; }
+
+  .gem-page-header {
+    background: linear-gradient(135deg, #4a1e78, #2e0e50);
+    padding: 44px 56px 36px;
+    border-bottom: 2px solid var(--gem-purple-bright);
+    position: relative; overflow: hidden;
+  }
+  .gem-page-header::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(136,64,204,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .gem-page-eyebrow {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 0.28em; color: #d0a0ff;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .gem-page-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(22px,4vw,46px); color: #fff0ff; line-height: 1.1; margin-bottom: 8px;
+  }
+  .gem-page-sub {
+    font-family: 'Cinzel', serif; font-size: clamp(12px,1.6vw,16px);
+    color: #c090e8; letter-spacing: 0.06em;
+  }
+
+  .gem-page-body { max-width: 820px; margin: 0 auto; padding: 56px 40px 80px; text-align: center; }
+
+  .gem-launch-block {
+    background: #e8d8f8;
+    border: 1px solid #9060c0;
+    border-top: 4px solid var(--gem-purple-bright);
+    border-radius: 6px; padding: 48px 40px; margin-bottom: 32px;
+  }
+
+  .gem-icon-large { font-size: 52px; margin-bottom: 20px; display: block; }
+
+  .gem-launch-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(20px,3vw,28px); color: #3a0e6e; margin-bottom: 16px;
+  }
+
+  .gem-launch-desc {
+    font-family: 'EB Garamond', serif; font-size: 18px;
+    color: #4a2070; line-height: 1.78; margin-bottom: 28px; font-style: italic;
+  }
+
+  .gem-steps {
+    list-style: none; margin-bottom: 36px;
+    display: flex; flex-direction: column; gap: 10px; text-align: left;
+  }
+  .gem-steps li {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: rgba(136,64,204,0.07);
+    border: 1px solid rgba(136,64,204,0.25);
+    border-radius: 3px; padding: 12px 16px;
+    font-family: 'EB Garamond', serif; font-size: 15.5px;
+    color: #3a1060; line-height: 1.6;
+  }
+  .gem-step-num {
+    font-family: 'Cinzel', serif; font-size: 11px;
+    color: var(--gem-purple-bright);
+    border: 1px solid var(--gem-purple-bright); border-radius: 50%;
+    width: 22px; height: 22px; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
+
+  .gem-cta {
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    font-family: 'Cinzel', serif; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #fff; background: var(--gem-purple);
+    border: 1px solid var(--gem-purple-bright);
+    padding: 16px 36px; border-radius: 3px;
+    text-decoration: none; transition: background 0.2s, box-shadow 0.2s; width: 100%;
+  }
+  .gem-cta:hover { background: var(--gem-purple-bright); box-shadow: 0 0 20px rgba(136,64,204,0.3); }
+
+  .gem-note {
+    font-family: 'EB Garamond', serif; font-size: 14px;
+    color: #7040a0; font-style: italic; margin-top: 16px;
+  }
+
+  .gem-page-back {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 0.16em; color: #7040a0;
+    background: none; border: none; cursor: pointer;
+    text-transform: uppercase; transition: color 0.18s; display: block; margin: 0 auto;
+  }
+  .gem-page-back:hover { color: var(--gem-purple); }
+
+  /* ── ANIMATIONS ──────────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SCROLLBAR ───────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 7px; background: #c8a86a; }
+  ::-webkit-scrollbar-thumb { background: #8a6418; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+  /* ── RESPONSIVE ──────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .map-page-header, .gem-page-header { padding: 28px 20px 24px; }
+    .map-page-body, .gem-page-body { padding: 28px 18px 60px; }
+    .poi-grid { grid-template-columns: 1fr; }
+    .map-nav-footer { padding: 16px 20px; }
+    .portal-sections { padding: 0 18px 60px; }
+    .gem-cards-grid { grid-template-columns: 1fr; }
+    .gem-launch-block { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════ TOP NAV ════════════════════════════════════════════════════ -->
+<nav id="top-nav">
+  <span class="nav-logo" onclick="showPage('home')">✦ Cartographica</span>
+
+  <span class="nav-section-label">Vol. I</span>
+  <button class="nav-btn" onclick="showMap(0)">Vienna 1529</button>
+  <button class="nav-btn" onclick="showMap(1)">Ebstorf c.1234</button>
+  <button class="nav-btn" onclick="showMap(2)">Vesconte c.1320</button>
+  <button class="nav-btn" onclick="showMap(3)">Dulcert 1339</button>
+  <button class="nav-btn" onclick="showMap(4)">Higden c.1350</button>
+  <button class="nav-btn" onclick="showMap(5)">Catalan Atlas 1375</button>
+
+  <span class="nav-section-label">Vol. II</span>
+  <button class="nav-btn" onclick="showMap(6)">Da Vinci 1502</button>
+  <button class="nav-btn" onclick="showMap(7)">Ruysch 1507</button>
+  <button class="nav-btn" onclick="showMap(8)">Utopia 1518</button>
+  <button class="nav-btn" onclick="showMap(9)">Carta Marina 1539</button>
+  <button class="nav-btn" onclick="showMap(10)">Mercator 1606</button>
+  <button class="nav-btn" onclick="showMap(11)">Zheng He 1628</button>
+  <button class="nav-btn" onclick="showMap(12)">Hereford c.1300</button>
+
+  <span class="nav-section-label">Vol. III</span>
+  <button class="nav-btn" onclick="showMap(13)">Carta Marina III</button>
+  <button class="nav-btn" onclick="showMap(14)">Fra Mauro c.1450</button>
+  <button class="nav-btn" onclick="showMap(15)">Catalan Atlas III</button>
+  <button class="nav-btn" onclick="showMap(16)">Juan de la Cosa 1500</button>
+  <button class="nav-btn" onclick="showMap(17)">Waldseemüller 1507</button>
+
+  <span class="nav-section-label">AI Tools</span>
+  <a href="https://gemini.google.com/gem/1BAaCpuP5Qz6k-eltDJyanNaqw5kNEKJ6?usp=sharing" target="_blank" rel="noopener" class="nav-gem-btn" style="text-decoration:none;">✦ The MapRoom Guide</a>
+  <a href="https://gemini.google.com/gem/18b3Qc1TurdCX-MCgzirQEAnK5Yt2GWWF?usp=sharing" target="_blank" rel="noopener" class="nav-gem-btn" style="text-decoration:none;">✦ Fiction Map Generator</a>
+  <a href="https://gemini.google.com/gem/1AKb8I5QUFk_FghC6l8Stgc0WpxO8okfu?usp=sharing" target="_blank" rel="noopener" class="nav-gem-btn" style="text-decoration:none;">✦ Cartographic Gem</a>
+  <a href="file:///Users/toddsmith/Desktop/map-history-study-guide.html" target="_self" class="nav-btn" style="color:#90d4a8;text-decoration:none;">◈ Study Guide</a>
+  <a href="file:///Users/toddsmith/Desktop/map-exhibition%20(1).html" target="_self" class="nav-btn" style="color:#90d4a8;text-decoration:none;">◈ Exhibition</a>
+  <a href="file:///Users/toddsmith/Desktop/map_apprenticeship_complete.html" target="_self" class="nav-btn" style="color:#90d4a8;text-decoration:none;">◈ Apprenticeship</a>
+</nav>
+
+<!-- ════ HOME PAGE ══════════════════════════════════════════════════ -->
+<div id="home" class="page active">
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+
+    <svg class="compass-rose" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#c8960c" stroke-width="0.4">
+        <circle cx="100" cy="100" r="96"/><circle cx="100" cy="100" r="72"/><circle cx="100" cy="100" r="48"/><circle cx="100" cy="100" r="24"/>
+        <line x1="100" y1="4" x2="100" y2="196"/><line x1="4" y1="100" x2="196" y2="100"/>
+        <line x1="32" y1="32" x2="168" y2="168"/><line x1="168" y1="32" x2="32" y2="168"/>
+        <line x1="66" y1="8" x2="134" y2="192"/><line x1="8" y1="66" x2="192" y2="134"/>
+        <line x1="192" y1="66" x2="8" y2="134"/><line x1="134" y1="8" x2="66" y2="192"/>
+        <polygon points="100,4 97,100 100,196 103,100" fill="#c8960c"/>
+        <polygon points="4,100 100,97 196,100 100,103" fill="#c8960c"/>
+        <polygon points="32,32 99,97 168,32" fill="#c8960c" opacity="0.5"/>
+        <polygon points="168,32 103,99 168,168" fill="#c8960c" opacity="0.5"/>
+        <polygon points="168,168 101,103 32,168" fill="#c8960c" opacity="0.5"/>
+        <polygon points="32,168 97,101 32,32" fill="#c8960c" opacity="0.5"/>
+      </g>
+    </svg>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow">An Instructional Cartographic Study Portal</div>
+      <h1 class="hero-title">Cartographica</h1>
+      <div class="hero-subtitle">Historical Maps of the Medieval &amp; Early Modern World</div>
+      <p class="hero-desc">Eighteen extraordinary maps spanning a thousand years of exploration — from the theological grandeur of the Ebstorf Mappa Mundi to the world-naming Waldseemüller of 1507. Study each map through cartographer profiles, historical context, and guided Points of Interest. Powered by AI tools to deepen your exploration.</p>
+      <div class="hero-rule">
+        <div class="hero-rule-line"></div>
+        <span class="hero-rule-diamond">✦</span>
+        <div class="hero-rule-line" style="background:linear-gradient(to left,transparent,var(--gold),transparent)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="portal-sections"><div class="portal-sections-inner">
+
+    <!-- VOL I -->
+    <div class="section-block">
+      <div class="section-block-header">
+        <div class="section-block-title">Volume I — Medieval &amp; Early Modern World</div>
+        <div class="section-block-count">6 Maps</div>
+      </div>
+      <div class="cards-grid">
+        <div class="map-card" onclick="showMap(0)"><div class="card-badge">Vol. I · Map 1</div><div class="card-title">The Attack on Vienna — 1529</div><div class="card-meta">Niklas Meldeman · Meldeman Plan</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(1)"><div class="card-badge">Vol. I · Map 2</div><div class="card-title">The Ebstorf Map — c. 1234</div><div class="card-meta">Gervase of Ebstorf · Ebstorfer Weltkarte</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(2)"><div class="card-badge">Vol. I · Map 3</div><div class="card-title">Portolan of the Mediterranean — c. 1320–25</div><div class="card-meta">Pietro Vesconte · Nautical Chart</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(3)"><div class="card-badge">Vol. I · Map 4</div><div class="card-title">Mediterranean &amp; Black Sea Portolan — 1339</div><div class="card-meta">Angelino Dulcert · Majorcan School</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(4)"><div class="card-badge">Vol. I · Map 5</div><div class="card-title">Map of the World from the Polychronicon — c. 1350</div><div class="card-meta">Ranulf Higden · Mappa Mundi</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(5)"><div class="card-badge">Vol. I · Map 6</div><div class="card-title">The Catalan Atlas — 1375</div><div class="card-meta">Abraham Cresques · Crown of Aragon</div><div class="card-cta">Study this Map →</div></div>
+      </div>
+    </div>
+
+    <!-- VOL II -->
+    <div class="section-block">
+      <div class="section-block-header">
+        <div class="section-block-title">Volume II — Renaissance &amp; Early Modern World</div>
+        <div class="section-block-count">7 Maps</div>
+      </div>
+      <div class="cards-grid">
+        <div class="map-card" onclick="showMap(6)"><div class="card-badge">Vol. II · Map 1</div><div class="card-title">Map of Imola — 1502</div><div class="card-meta">Leonardo da Vinci · Renaissance Cartography</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(7)"><div class="card-badge">Vol. II · Map 2</div><div class="card-title">Universalior Cogniti Orbis Tabula — 1507</div><div class="card-meta">Johannes Ruysch · Ptolemy Edition</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(8)"><div class="card-badge">Vol. II · Map 3</div><div class="card-title">Map of Utopia — 1518</div><div class="card-meta">Ambrosius Holbein · Thomas More</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(9)"><div class="card-badge">Vol. II · Map 4</div><div class="card-title">Carta Marina — 1539</div><div class="card-meta">Olaus Magnus · Northern Europe</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(10)"><div class="card-badge">Vol. II · Map 5</div><div class="card-title">Septentrionalium Terrarum — 1606</div><div class="card-meta">Mercator &amp; Hondius · Arctic Regions</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(11)"><div class="card-badge">Vol. II · Map 6</div><div class="card-title">Mao Kun / Zheng He Chart — pub. 1628</div><div class="card-meta">Zheng He Voyages · Chinese Cartography</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(12)"><div class="card-badge">Vol. II · Map 7</div><div class="card-title">Hereford Mappa Mundi — c. 1300</div><div class="card-meta">Richard of Haldingham · Greatest Survivor</div><div class="card-cta">Study this Map →</div></div>
+      </div>
+    </div>
+
+    <!-- VOL III -->
+    <div class="section-block">
+      <div class="section-block-header">
+        <div class="section-block-title">Volume III — Late Medieval &amp; Age of Discovery</div>
+        <div class="section-block-count">5 Maps</div>
+      </div>
+      <div class="cards-grid">
+        <div class="map-card" onclick="showMap(13)"><div class="card-badge">Vol. III · Map 1</div><div class="card-title">Carta Marina — 1539</div><div class="card-meta">Olaus Magnus · Sea Monsters &amp; Scandinavia</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(14)"><div class="card-badge">Vol. III · Map 2</div><div class="card-title">Fra Mauro's Map of the World — c. 1450</div><div class="card-meta">Fra Mauro · Greatest Memorial of Medieval Cartography</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(15)"><div class="card-badge">Vol. III · Map 3</div><div class="card-title">Catalan Atlas — 1375 (Vol. III)</div><div class="card-meta">Abraham Cresques · Vol. III Treatment</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(16)"><div class="card-badge">Vol. III · Map 4</div><div class="card-title">The First Map of America — 1500</div><div class="card-meta">Juan de la Cosa · Columbus's Captain</div><div class="card-cta">Study this Map →</div></div>
+        <div class="map-card" onclick="showMap(17)"><div class="card-badge">Vol. III · Map 5</div><div class="card-title">The Waldseemüller Map — 1507</div><div class="card-meta">Martin Waldseemüller · America's Birth Certificate</div><div class="card-cta">Study this Map →</div></div>
+      </div>
+    </div>
+
+    <!-- AI TOOLS -->
+    <div class="section-block">
+      <div class="section-block-header">
+        <div class="section-block-title">AI-Powered Tools</div>
+        <div class="section-block-count">2 Gems + 1 Guide</div>
+      </div>
+      <div class="gem-cards-grid">
+
+        <!-- Gem 1: MapRoom Guide -->
+        <!-- Gem 1: MapRoom Guide -->
+        <a href="https://gemini.google.com/gem/1BAaCpuP5Qz6k-eltDJyanNaqw5kNEKJ6?usp=sharing" target="_blank" rel="noopener" class="gem-card" style="display:block;text-decoration:none;">
+          <div class="gem-eyebrow">Gemini AI Gem</div>
+          <div class="gem-title">The MapRoom Guide</div>
+          <div class="gem-desc">Transform any historical map into a full museum experience — with exhibit panels, docent scripts, visitor activities, and curatorial context built around your chosen map.</div>
+          <div class="gem-how">
+            <div class="gem-how-label">How it works</div>
+            <div class="gem-how-text">Enter the name of any map and the Gem builds a complete museum-quality experience around it — perfect for deepening your study of the maps in this portal.</div>
+          </div>
+          <span class="gem-launch-btn"><span class="gem-launch-icon">✦</span> Launch The MapRoom Guide ↗</span>
+        </a>
+        <!-- Gem 2: Fiction Map Generator -->
+        <a href="https://gemini.google.com/gem/18b3Qc1TurdCX-MCgzirQEAnK5Yt2GWWF?usp=sharing" target="_blank" rel="noopener" class="gem-card" style="display:block;text-decoration:none;">
+          <div class="gem-eyebrow">Gemini AI Gem</div>
+          <div class="gem-title">Fiction Map Generator</div>
+          <div class="gem-desc">Give the title of any fiction book and this Gem generates the map of that world — bringing imaginary geographies to life in the style of historical cartography.</div>
+          <div class="gem-how">
+            <div class="gem-how-label">How it works</div>
+            <div class="gem-how-text">Enter a fiction book title and the Gem creates a detailed cartographic map of that book's world, rendered with the same care and craft as the historical maps in this portal.</div>
+          </div>
+          <span class="gem-launch-btn"><span class="gem-launch-icon">✦</span> Launch Fiction Map Generator ↗</span>
+        </a>
+
+        <!-- Gem 3: New Gem -->
+        <a href="https://gemini.google.com/gem/1AKb8I5QUFk_FghC6l8Stgc0WpxO8okfu?usp=sharing" target="_blank" rel="noopener" class="gem-card" style="display:block;text-decoration:none;">
+          <div class="gem-eyebrow">Gemini AI Gem</div>
+          <div class="gem-title">Cartographic AI Gem</div>
+          <div class="gem-desc">An additional AI-powered Gem to support your historical map studies — click to launch and explore its capabilities in Gemini.</div>
+          <div class="gem-how">
+            <div class="gem-how-label">How it works</div>
+            <div class="gem-how-text">Click to open this Gem directly in Gemini. Requires your Google account login.</div>
+          </div>
+          <span class="gem-launch-btn"><span class="gem-launch-icon">✦</span> Launch Gem ↗</span>
+        </a>
+        </div>
+
+        <!-- Local Study Guide -->
+        <a href="file:///Users/toddsmith/Desktop/map-history-study-guide.html" target="_self" class="local-card" style="cursor:pointer;display:block;text-decoration:none;">
+          <div class="local-eyebrow">Local Study Resource</div>
+          <div class="local-title">Map History Study Guide</div>
+          <div class="local-desc">Your personal HTML study guide saved locally on your desktop — a companion reference for the maps covered in this portal, available offline at any time.</div>
+          <div class="gem-how" style="background:rgba(30,90,60,0.12);border:1px solid rgba(30,90,60,0.3)">
+            <div class="gem-how-label" style="color:#1e6040">How to use</div>
+            <div class="gem-how-text" style="color:#1e5030">Opens directly from your Desktop in a new browser tab. No internet connection required.</div>
+          </div>
+          <span class="local-launch-btn" style="display:block;">◈ Open Study Guide</span>
+        </a>
+
+        <!-- Exhibition -->
+        <a href="file:///Users/toddsmith/Desktop/map-exhibition%20(1).html" target="_self" class="local-card" style="cursor:pointer;display:block;text-decoration:none;">
+          <div class="local-eyebrow">Local Study Resource</div>
+          <div class="local-title">Map Exhibition</div>
+          <div class="local-desc">An interactive map exhibition experience saved to your Desktop — explore curated historical maps in a gallery-style presentation.</div>
+          <div class="gem-how" style="background:rgba(30,90,60,0.12);border:1px solid rgba(30,90,60,0.3)">
+            <div class="gem-how-label" style="color:#1e6040">How to use</div>
+            <div class="gem-how-text" style="color:#1e5030">Opens directly from your Desktop in a new browser tab. No internet connection required.</div>
+          </div>
+          <span class="local-launch-btn" style="display:block;">◈ Open Map Exhibition</span>
+        </a>
+
+        <!-- Apprenticeship -->
+        <a href="file:///Users/toddsmith/Desktop/map_apprenticeship_complete.html" target="_self" class="local-card" style="cursor:pointer;display:block;text-decoration:none;">
+          <div class="local-eyebrow">Local Study Resource</div>
+          <div class="local-title">Map Apprenticeship</div>
+          <div class="local-desc">A complete map apprenticeship program saved to your Desktop — structured lessons and activities for deep cartographic study.</div>
+          <div class="gem-how" style="background:rgba(30,90,60,0.12);border:1px solid rgba(30,90,60,0.3)">
+            <div class="gem-how-label" style="color:#1e6040">How to use</div>
+            <div class="gem-how-text" style="color:#1e5030">Opens directly from your Desktop in a new browser tab. No internet connection required.</div>
+          </div>
+          <span class="local-launch-btn" style="display:block;">◈ Open Apprenticeship</span>
+        </a>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MAP CONTENT PAGE ════════════════════════════════════════════ -->
+<div id="map-content" class="page map-page">
+  <div class="map-page-header">
+    <div class="map-page-vol" id="mc-vol"></div>
+    <h1 class="map-page-title" id="mc-title"></h1>
+    <div class="map-page-sub" id="mc-sub"></div>
+  </div>
+  <div class="map-page-body" id="mc-body"></div>
+  <div class="map-nav-footer">
+    <button class="map-nav-btn" id="btn-prev" onclick="navMap(-1)">← Prev</button>
+    <button class="map-nav-home" onclick="showPage('home')">✦ Portal Home</button>
+    <button class="map-nav-btn" id="btn-next" onclick="navMap(1)">Next →</button>
+  </div>
+</div>
+
+<!-- ════ GEM LAUNCH PAGES ════════════════════════════════════════════ -->
+<div id="gem-maproom" class="page gem-page">
+  <div class="gem-page-header">
+    <div class="gem-page-eyebrow">✦ Gemini AI Gem</div>
+    <h1 class="gem-page-title">The MapRoom Guide</h1>
+    <div class="gem-page-sub">Build a complete museum experience around any historical map</div>
+  </div>
+  <div class="gem-page-body">
+    <div class="gem-launch-block">
+      <span class="gem-icon-large">🏛️</span>
+      <div class="gem-launch-title">The MapRoom Guide</div>
+      <div class="gem-launch-desc">
+        Input the name of any map — including the 18 maps studied in this portal — and the MapRoom Guide Gem will generate a complete museum experience around it, with exhibit panels, docent scripts, visitor activities, and rich curatorial context.
+      </div>
+      <ul class="gem-steps">
+        <li><span class="gem-step-num">1</span>Make sure you are logged into your Google account in your browser.</li>
+        <li><span class="gem-step-num">2</span>Click the Launch button below to open the MapRoom Guide Gem in a new tab.</li>
+        <li><span class="gem-step-num">3</span>Type the name of any map — for example: <em>"The Catalan Atlas 1375"</em> or <em>"Waldseemüller Map 1507"</em> — and let the Gem build your museum experience.</li>
+        <li><span class="gem-step-num">4</span>Use the generated exhibit content alongside the study materials in this portal for a complete learning experience.</li>
+      </ul>
+      <a href="https://gemini.google.com/gem/1BAaCpuP5Qz6k-eltDJyanNaqw5kNEKJ6?usp=sharing" target="_blank" rel="noopener" class="gem-cta">
+        <span>✦</span> Open The MapRoom Guide in Gemini
+      </a>
+      <div class="gem-note">Opens in a new browser tab. Requires your Google account login.</div>
+    </div>
+    <button class="gem-page-back" onclick="showPage('home')">← Return to Portal Home</button>
+  </div>
+</div>
+
+<div id="gem-fiction" class="page gem-page">
+  <div class="gem-page-header">
+    <div class="gem-page-eyebrow">✦ Gemini AI Gem</div>
+    <h1 class="gem-page-title">Fiction Map Generator</h1>
+    <div class="gem-page-sub">Generate the map of any fictional world from a book title</div>
+  </div>
+  <div class="gem-page-body">
+    <div class="gem-launch-block">
+      <span class="gem-icon-large">📖</span>
+      <div class="gem-launch-title">Fiction Map Generator</div>
+      <div class="gem-launch-desc">
+        Enter the title of any fiction book and this Gem generates the cartographic map of that book's world — bringing imaginary geographies to life with the craft and detail of historical mapmaking. From Middle-earth to Westeros to Narnia, every story has a map waiting to be drawn.
+      </div>
+      <ul class="gem-steps">
+        <li><span class="gem-step-num">1</span>Make sure you are logged into your Google account in your browser.</li>
+        <li><span class="gem-step-num">2</span>Click the Launch button below to open the Fiction Map Generator Gem in a new tab.</li>
+        <li><span class="gem-step-num">3</span>Type the title of any fiction book — for example: <em>"The Lord of the Rings"</em>, <em>"Dune"</em>, or <em>"Treasure Island"</em> — and let the Gem generate its map.</li>
+        <li><span class="gem-step-num">4</span>Compare the generated maps to the historical cartographic styles studied in this portal — notice the conventions, symbols, and orientations the Gem draws from.</li>
+      </ul>
+      <a href="https://gemini.google.com/gem/18b3Qc1TurdCX-MCgzirQEAnK5Yt2GWWF?usp=sharing" target="_blank" rel="noopener" class="gem-cta">
+        <span>✦</span> Open Fiction Map Generator in Gemini
+      </a>
+      <div class="gem-note">Opens in a new browser tab. Requires your Google account login.</div>
+    </div>
+    <button class="gem-page-back" onclick="showPage('home')">← Return to Portal Home</button>
+  </div>
+</div>
+
+<script>
+// ════ MAP DATA ════════════════════════════════════════════════════════
+const maps = [
+  // VOL I ──────────────────────────────────────────────────────────────
+  { vol:"Volume I — Medieval & Early Modern World", title:"The Attack on Vienna — 1529", sub:"Niklas Meldeman · Meldeman Plan",
+    bio:`Niklas Meldeman (also spelled Meldemann) was a German-Austrian printer, painter, and publisher who operated in Nuremberg and Vienna in the early sixteenth century. He is best remembered in cartographic history for commissioning and publishing the famous circular panoramic plan of Vienna in 1530, an extraordinary document that preserved a vivid eyewitness account of the first Ottoman siege of the city.`,
+    facts:["Shortly after the 1529 siege ended, Meldeman traveled to Vienna and acquired a drawing from an anonymous artist who had reportedly climbed to the top of St. Stephen's Cathedral during the siege itself, sketching the chaos below in real time. Meldeman had the work engraved onto six woodblocks and published it in Nuremberg in 1530.","The map is not topographically precise; instead it emphasizes military importance, showing fortifications in detail while minimizing civilian buildings. This reflects the military-intelligence purpose of siege maps in the sixteenth century.","The Ottoman siege of 1529 — led by Suleiman the Magnificent with a force estimated between 80,000 and over 100,000 men — lasted only about 20 days (September 27 to October 15) and failed largely because Suleiman's heavy siege artillery had been abandoned in the mud en route. Vienna's survival became a turning point in the Ottoman advance into Europe.","The original woodcut resides in the Wien Museum (Historical Museum of the City of Vienna), having been purchased at auction in Leipzig in 1927. It measures approximately 81 x 86 cm.","The Meldeman Plan is considered one of the earliest panoramic siege maps in European cartographic history, blending artistic illustration with practical military documentation."],
+    pois:[{num:"POI #1",title:"St. Stephen's Cathedral at the Center",look:"The large Gothic church dominating the very heart of the circular map, labeled as the Stephansdom. Its tall spire towers above all other structures.",body:"This is not just a landmark — it was literally the cartographer's vantage point. The anonymous artist climbed to the top of the cathedral's south tower during the siege to sketch the panorama. Placing the cathedral at the center was both topographically honest and symbolically powerful, representing the spiritual heart of Vienna under threat."},{num:"POI #2",title:"Turkish Encampments Ringing the City",look:"Look for rows of small tent symbols arranged in arc formations surrounding the city walls on the outer edges of the circular map. They are densely packed and extend in all directions.",body:"These represent the Ottoman besieging force estimated at over 80,000 soldiers. The encircling visual conveys the sense of total isolation Vienna felt — cut off from any relief. The Ottoman failure to breach the walls with light artillery ultimately forced their withdrawal."},{num:"POI #3",title:"The Burning Suburbs",look:"Look for small flame symbols and darkened areas in the neighborhoods just outside the city walls, especially to the west and south.",body:"As the Ottomans advanced, Vienna's defenders deliberately burned the suburbs to deny shelter and cover to the attacking forces. This tactic, though devastating for the inhabitants, contributed significantly to the city's survival by slowing the Ottoman approach."},{num:"POI #4",title:"The City Walls and Bastions",look:"Trace the irregular, thick polygonal boundary that divides the ordered city center from the chaos outside. Look for small towers and projecting bastions at intervals along the wall.",body:"Vienna's medieval walls, while aging, held firm against the lighter artillery Suleiman was forced to rely on after leaving his heavy guns behind. The siege revealed their vulnerability, however, triggering a comprehensive modernization project completed in 1548, with eleven new bastions."},{num:"POI #5",title:"The Danube River and Islands",look:"Look for the winding waterway shown along the upper portions of the panorama, with small islands visible mid-channel.",body:"The Danube was both a strategic asset and a logistical challenge. It provided Vienna with a natural defense on its north side and limited where the Ottomans could position forces. Control of the river crossings was vital to any siege operation in this region."},{num:"POI #6",title:"Five Heraldic Shields",look:"Locate five coats of arms arranged in the decorative border area of the map — look for shield-shaped emblems with distinct heraldic designs.",body:"These shields identify the key political powers involved in the defense of Vienna, including the Habsburg dynasty. They served as a reminder that this was not merely a local event but a clash of empires — the Holy Roman Empire versus the Ottoman Empire — with the fate of Central Europe hanging in the balance."}],
+    links:[{label:"Digital Viewing & Overview (Medieval Histories)",url:"https://www.amusingplanet.com/2022/03/meldeman-plan-first-siege-of-vienna.html"},{label:"Print-Optimized Reference",url:"https://www.raremaps.com/gallery/detail/58749/der-stadt-wien-belegerung-wied-die-auff-dem-hohen-sant-seffa-camesina-meldeman"}]},
+
+  { vol:"Volume I — Medieval & Early Modern World", title:"The Ebstorf Map — c. 1234", sub:"Gervase of Ebstorf · Ebstorfer Weltkarte",
+    bio:`The Ebstorf Map is most commonly attributed to Gervase of Ebstorf, believed to have served as prior of the Benedictine convent at Ebstorf in northern Germany between approximately 1222 and 1234. Some scholars have proposed that this Gervase may be the same person as Gervase of Tilbury, an English-born scholar, lawyer, and courtier working in the court of the Holy Roman Emperor — though this identification remains contested among historians.`,
+    facts:["Made between 1234 and 1240, the Ebstorf Map was the largest known medieval map of the world (mappa mundi), sewn together from 30 sheets of goatskin parchment to form a square measuring approximately 3.6 x 3.6 meters (about 12 by 12 feet). It was discovered in the Benedictine convent at Ebstorf in 1843.","The map was tragically destroyed during Allied bombing raids on Hanover in World War II in 1943. However, three reproductions were made in 1951–1953. One reproduction is now displayed at the Ebstorf convent itself.","Unlike a modern map intended for navigation, the Ebstorf Map functioned as a visual encyclopedia of medieval knowledge, containing approximately 2,345 entries, including 1,500 pieces of text and 845 illustrations covering theology, geography, secular history, myths, and bestiaries.","The map is oriented with East at the top — the direction of Paradise and the rising sun — a standard feature of medieval Christian maps. Asia dominates the upper half, Europe occupies the lower left, and Africa the lower right.","Its most distinctive theological feature was depicting the world as the body of Christ: his head at the top (East/Paradise), his hands at the sides (North and South), and his feet dangling at the bottom (West, at the Strait of Gibraltar). Jerusalem was placed at the navel — the spiritual center of the Christian world."],
+    pois:[{num:"POI #1",title:"Christ's Head at the Top of the Map",look:"Look at the very top (eastern edge) of the map for an illustration of the crowned head of Christ, depicted in a golden halo or crown, presiding over the map's uppermost region.",body:"This placement reflects the medieval belief that East is the direction of Paradise and the Last Judgment. The entire world map is literally contained within Christ's divine body — a profound statement that geography and faith are inseparable. East was so tied to the sacred direction that our modern word 'orientation' derives from the Latin oriens, meaning East."},{num:"POI #2",title:"Jerusalem at the Center (Christ's Navel)",look:"Find the city of Jerusalem in the geographic middle of the map, depicted with a golden eight-sided medieval wall or circular enclosure. It sits at the heart of the composition.",body:"Jerusalem's central placement was theological, not geographic. As the site of Christ's death and resurrection — and the spiritual navel of the Christian world — it had to occupy the center. The map was likely created to help pilgrims and crusaders visualize routes to the Holy Land."},{num:"POI #3",title:"Paradise with Adam and Eve in the Far East",look:"Look at the very top of the map, in the easternmost region, for small figures of Adam and Eve near a serpent, and symbols of the four great rivers of Paradise flowing outward.",body:"Medieval geography placed the Garden of Eden at the eastern end of the earth, the source of the Nile, Tigris, Euphrates, and Ganges. This belief, drawn from the Book of Genesis, shaped the orientation of Christian world maps for centuries."},{num:"POI #4",title:"Noah's Ark on Mount Ararat",look:"Search in the region corresponding to eastern Anatolia (modern Turkey) for a small rectangular ark-shaped vessel perched atop a mountain, labeled as Ararat.",body:"The inclusion of Noah's Ark was standard in medieval mappae mundi. The map was not just geographic but a sacred history of the world from Creation to the present. Every major biblical event had its place, making the map a kind of illustrated scripture."},{num:"POI #5",title:"Exotic Creatures and Monstrous Races",look:"Along the outer edges of the map, particularly in Africa and the far East, look for illustrations of fantastical beings — one-eyed men, dog-headed people (cynocephali), giants, or unusual animals like elephants and unicorns.",body:"Medieval cartographers drew on classical Greek and Roman texts that described monstrous races inhabiting the edges of the known world. Including them was not naivety — it was scholarship. The edges of the map marked the boundary between the known and the unknowable."},{num:"POI #6",title:"Christ's Feet at Gibraltar",look:"At the very bottom (western edge) of the map, look for the two feet or legs of Christ flanking the narrow channel between Europe and Africa where the Mediterranean meets the Atlantic.",body:"The Strait of Gibraltar represented the western limit of the known world in classical and medieval geography. The famous 'Pillars of Hercules' marked the edge of the inhabited earth. By placing Christ's feet here, the mapmaker declared that even the farthest limit of the world is held within the embrace of the divine."}],
+    links:[{label:"Digital Viewing (high-resolution zoomable image)",url:"https://www.medieval.eu/ebstorf-map/"},{label:"Print-Optimized Reference (facsimile with scholarly description)",url:"https://raremaps.com/gallery/detail/65079"}]},
+
+  { vol:"Volume I — Medieval & Early Modern World", title:"Portolan of the Mediterranean — c. 1320–1325", sub:"Pietro Vesconte · Signed Nautical Atlas",
+    bio:`Pietro Vesconte (active 1310–1330) was a Genoese-born cartographer who conducted most of his professional work in Venice, and is widely regarded as one of the most important pioneers in the history of nautical cartography. He appears to have been the first professional mapmaker to regularly sign and date his works — a practice almost unheard of before him — and his 1311 portolan chart of the eastern Mediterranean remains the oldest signed and dated nautical chart that has survived from the medieval period.`,
+    facts:["The portolan charts produced by Vesconte around 1320–1325 were created to accompany the Liber Secretorum Fidelium Crucis ('Book of the Secrets of the Faithful of the Cross'), a crusade propaganda treatise written by the Venetian statesman Marino Sanudo, intended to convince European rulers — including Pope John XXII and the King of France — that a new crusade was both logistically feasible and strategically necessary.","Vesconte produced a world map, a detailed nautical atlas of five sheets, a map of the Holy Land, and city plans of Acre and Jerusalem for this project. Three manuscript copies survive, held today in the Vatican Library, the Zentralbibliothek Zurich, and the British Library in London.","Unlike the symbolic mappae mundi of his era, Vesconte's portolans were built on empirical sailor-derived data, featuring accurate coastlines, rhumb line networks, and linear scale bars. His Mediterranean and Black Sea coastlines were so precise that subsequent cartographers did not significantly improve upon them for over a century.","Vesconte's use of portolan techniques in a world map was a revolutionary development — he was the first to introduce the precision of navigational charts into the broader tradition of world mapping, bridging practical seamanship and scholarly geography.","His 1318 atlas, held in Vienna's Austrian National Library (Cod. 594), is considered the earliest surviving European atlas of nautical charts — a bound, multi-sheet book designed to be carried on ships."],
+    pois:[{num:"POI #1",title:"Rhumb Lines Radiating Across the Sea",look:"Look across the open water areas of the map for a dense web of straight lines — some in black, some in red — radiating outward from hidden central points, creating a starburst pattern across the Mediterranean.",body:"These are rhumb lines (also called wind lines or loxodromes), used by medieval sailors to plot compass bearings. By placing a ruler from their current position to their destination and finding the angle relative to a rhumb line, navigators could hold a steady compass course. This network was the GPS of the medieval Mediterranean."},{num:"POI #2",title:"The Compass Rose",look:"Search for a central decorative circle or starburst shape, usually embellished with color, from which the rhumb lines radiate. There may be more than one on the chart.",body:"The compass rose not only helped sailors read the wind directions but served as the geometric foundation for the entire rhumb line network. Vesconte was among the earliest cartographers to formalize and refine this navigational tool, which became the defining visual signature of portolan charts."},{num:"POI #3",title:"Accurate Shape of the Italian Boot",look:"Look at the central portion of the Mediterranean for the unmistakable elongated peninsula of Italy, with its distinctive southward-pointing 'boot' shape, clearly recognizable compared to earlier maps.",body:"The extraordinary accuracy of Vesconte's Italian coastline was unprecedented in medieval cartography. Modern cartometric analysis has shown his charts achieve a median error of under 30 km across the entire sea, an achievement that would not be surpassed for at least a century."},{num:"POI #4",title:"The Holy Land and Palestine",look:"On the eastern edge of the Mediterranean, find a detailed section of the Levant coastline, labeled with cities such as Acre, Jaffa, and Jerusalem, possibly accompanied by a separate inset map of the Holy Land.",body:"This portion of Vesconte's map served an explicitly crusading purpose — it was military intelligence. Marino Sanudo needed to show European leaders exactly where Christian forces would need to land, which ports to secure, and which fortifications to target."},{num:"POI #5",title:"Britain and Ireland in the North",look:"In the upper-left area of the atlas, find an elongated landmass representing the British Isles. Note its shape compared to the Mediterranean coastlines — it is less accurate but still an improvement over earlier attempts.",body:"Vesconte produced some of the earliest and most ambitious attempts to chart northern European coastlines from available sources. His depiction of Britain was a marked improvement over his predecessors, revealing that cartographic knowledge was slowly expanding beyond the Mediterranean world."},{num:"POI #6",title:"The Black Sea",look:"Find the enclosed sea in the northeast portion of the map — a large body of water connected to the Mediterranean through a narrow strait, roughly pear-shaped.",body:"The Black Sea was crucial to medieval European trade routes — Italian merchants from Genoa and Venice maintained colonies along its shores, trading in grain, furs, slaves, and spices from Central Asia and the East. Vesconte's accurate depiction reflected Venice's deep commercial interest in keeping those trade routes open."}],
+    links:[{label:"Digital Viewing (Vatican Library, signed 1320-21 copy)",url:"https://digi.vatlib.it/view/MSS_Pal.lat.1362A"},{label:"Print-Optimized Reference (British Library description and images)",url:"https://www.bl.uk/catalogues/illuminatedmanuscripts/record.asp?MSID=8308"}]},
+
+  { vol:"Volume I — Medieval & Early Modern World", title:"Mediterranean & Black Sea Portolan — 1339", sub:"Angelino Dulcert · Founding Document of the Majorcan Cartographic School",
+    bio:`Angelino Dulcert (also known as Angelino de Dalorto or Angelino Dulceto, active c. 1320–1339) was a cartographer of Genoese origin who relocated to Palma, Majorca, where he became the founding figure of the celebrated Majorcan school of cartography. He is responsible for two of the most significant portolan charts of the fourteenth century: the Dalorto chart of approximately 1325 and the Dulcert chart of 1339, the latter being the first known portolan produced in Palma and the direct ancestor of the brilliant Catalan Atlas tradition.`,
+    facts:["The 1339 Dulcert chart is signed in Latin: 'Angelino Dulcert me fecit in civitate Maioriche anno MCCCXXXIX.' It is held today by the Bibliothèque nationale de France in Paris (Rés. Ge B 696) and measures approximately 75 x 102 cm, composed of two sheets of parchment joined together.","The chart covers the full Mediterranean and Black Sea basin, extending north to the British Isles and south along the northwest African coast. It includes one of the earliest cartographic depictions of the Canary Islands and the island of Madeira.","The 1339 map is considered the founding document of the Majorcan cartographic school, which would go on to produce some of the most beautiful and influential maps of the late medieval period, culminating in Abraham Cresques's magnificent Catalan Atlas of 1375.","Unlike earlier Genoese or Venetian portolans, Dulcert's charts introduced a more decorative and iconographic style, incorporating miniature illustrations of rulers, flags, cities, mountain ranges, and human figures, blending navigational utility with artistic expression.","The chart features a notable depiction of Mansa Musa, the legendary ruler of the Mali Empire, and the Mongol ruler Özbeg Khan, reflecting the chart's remarkable engagement with the political geography of the wider medieval world beyond Europe."],
+    pois:[{num:"POI #1",title:"The Canary Islands",look:"Along the far left (western) edge of the chart, beyond the coast of northwest Africa and the Iberian Peninsula, look for a small cluster of island shapes in the open Atlantic. One island may bear a red cross symbol.",body:"The red cross on Lanzarote commemorates the Genoese explorer Lanzarotto Malocello, who reached the island around 1312–1339. This is among the earliest cartographic documentation of the Canary Islands, marking a pivotal moment in the expansion of European geographic awareness into the Atlantic."},{num:"POI #2",title:"Mansa Musa, King of Mali",look:"In the interior of northwest Africa, find a small seated or standing figure of a dark-skinned ruler, richly dressed, often holding a gold orb or scepter. A label in Latin or Italian identifies him as the lord of Mali.",body:"Mansa Musa's 1324 hajj pilgrimage — during which he reportedly distributed so much gold that he caused inflation across Egypt for over a decade — made him the most famous ruler in the Islamic world. Dulcert's inclusion reflects European awareness of West Africa as a center of extraordinary wealth."},{num:"POI #3",title:"Özbeg Khan of the Golden Horde",look:"In the region north of the Black Sea and Caspian Sea — the vast steppe territories — look for a figure of a turbaned ruler or a labeled banner, with a Latin inscription identifying him as ruler of the Mongols or of Sarai.",body:"Özbeg Khan ruled the Golden Horde (1313–1341), a powerful Mongol successor state that controlled the northern Black Sea trade routes critical to Italian merchants. Dulcert's acknowledgment of this ruler reflects the intensely practical nature of portolan maps — knowing who controlled the land behind the coastline was as important as knowing the coastline itself."},{num:"POI #4",title:"The Rhumb Line Network",look:"Look across the open sea areas for the characteristic web of intersecting lines radiating from 16 compass points in 32 directions. The two wind roses — one near Barcelona, one near Antalya — are their geometric centers.",body:"Unlike Vesconte's earlier charts, Dulcert's rhumb line network uses two overlapping wind roses covering the full length of the Mediterranean, a geometric innovation that improved navigational precision. This dual-rose system would become standard in all subsequent Majorcan portolans."},{num:"POI #5",title:"The Atlas Mountains Styled as a Bird's Leg",look:"Along the northwest African coast (Morocco and Algeria), find a stylized chain of mountain symbols that scholars have noted resembles the leg of a bird when viewed closely.",body:"This distinctive rendering of the Atlas Mountains reflects the blending of Arabic geographic knowledge with European cartographic conventions. Dulcert and his contemporaries drew on Islamic geographical sources for information about the interior of Africa, a cross-cultural exchange that medieval cartography depended on."},{num:"POI #6",title:"The Island of 'Bracile' West of Ireland",look:"In the waters west of Ireland — in the open Atlantic — look for a phantom island labeled something like 'Bracile,' 'Brazil,' or a variant spelling, shown as a circular island.",body:"This mysterious island, appearing in European charts from the 1325 Dalorto map onward, is the legendary island of Hy-Brasil from Irish mythology. It may have contributed to the naming of the country Brazil when Portuguese explorers reached South America in 1500."}],
+    links:[{label:"Digital Viewing (Bibliothèque nationale de France, Gallica)",url:"https://gallica.bnf.fr/ark:/12148/btv1b52503220z"},{label:"Print-Optimized Reference (Wikipedia with full-resolution image)",url:"https://en.wikipedia.org/wiki/Angelino_Dulcert"}]},
+
+  { vol:"Volume I — Medieval & Early Modern World", title:"Map of the World from the Polychronicon — c. 1350", sub:"Ranulf Higden · Higden Mappa Mundi",
+    bio:`Ranulf Higden (c. 1280–1363) was an English Benedictine monk who spent most of his life at the Abbey of St. Werburgh in Chester, England. He is celebrated as the author of the Polychronicon, described as "the most exhaustive universal history produced in medieval times and the best seller of its age" — a seven-book Latin compilation of world history from Creation to his own day, drawing on about 40 different sources and surviving in over 100 manuscript copies.`,
+    facts:["The oval world map found in copies of the Polychronicon is sometimes called the Higden Mappa Mundi. Because the Polychronicon was one of the most copied books in late medieval England, it is responsible for roughly one quarter of all known mappae mundi — they come from Polychronicon manuscripts.","The map follows the traditional T-O schema: Asia occupies the top half, Europe the lower left, Africa the lower right, with the T-shaped body of water (the Mediterranean, the Nile, and the Don River) dividing the three continents. Jerusalem sits at the center.","Unlike the grand Ebstorf or Hereford maps, the Higden map was a miniature illustration embedded in a manuscript rather than a stand-alone wall display. This made it widely reproducible and accessible to the literate clergy and nobility of England.","The map includes 39 named towns, of which 14 are in England — a notably England-centric perspective that reflects Higden's monastic identity and audience. No other region receives such disproportionate coverage, revealing how geographic knowledge was filtered through national and cultural bias.","The Polychronicon was translated into English by John Trevisa in 1387 and later printed by William Caxton in 1482 — one of the first books printed in England. The map thus survived not just in manuscript but in print."],
+    pois:[{num:"POI #1",title:"The Oval or Elongated Shape of the World",look:"Notice the overall shape of the map — an elongated oval or almond shape (mandorla) rather than a circular T-O form. Asia fills the upper half generously, while Europe and Africa share the smaller lower half.",body:"The oval form of the Higden map is distinctive among medieval world maps. It reflects a compromise between the circular T-O tradition and a more elongated view of the world influenced by classical geography. The disproportionate size of Asia reflected the medieval belief that Asia contained the majority of the world's land and civilization."},{num:"POI #2",title:"Jerusalem at the Center",look:"Find the label or symbol for Jerusalem positioned in the middle of the map, at the junction of the three continents and the T-shaped seas.",body:"As in all Christian mappae mundi, Jerusalem's central position is theological, not geographical. It marked the site of the Crucifixion and Resurrection and was the spiritual destination of every crusader and pilgrim."},{num:"POI #3",title:"England and Britain in the Lower Left",look:"In the lower-left corner (the European quadrant), find the British Isles — look for an oblong island labeled 'Anglia' or 'Britannia' situated off the northwestern edge of Europe.",body:"The unusual detail given to England on this map — 14 of the 39 named towns — reveals the map's authorship and intended audience. Higden was an English monk writing for English readers. His local geography was precise; his knowledge of distant lands was largely borrowed from earlier texts."},{num:"POI #4",title:"Paradise (Eden) in the Far East",look:"At the very top of the map (the eastern edge), look for a label or small scene depicting Paradise — possibly with a garden motif, river sources, or the names of Adam and Eve.",body:"Medieval geography universally placed the Garden of Eden in the East, at the furthest known boundary of Asia. The four rivers of Paradise — the Nile, Tigris, Euphrates, and Ganges — were believed to flow from this single eastern source."},{num:"POI #5",title:"The T-Shaped Water Dividing the Continents",look:"Look for the distinctive T-shaped body of water at the heart of the map: the Mediterranean running horizontally across the lower half, with the Don River (or Nile) forming the upright of the T.",body:"The T-O map design derives from Isidore of Seville's Etymologiae (c. 600 CE), which described the three continents as divided by water in the shape of a T inscribed in an O. This ancient framework persisted for nearly a thousand years."},{num:"POI #6",title:"Noah's Ark and Biblical Geography",look:"Somewhere in the upper (Asian) portion of the map, search for a reference to Mount Ararat or Noah's Ark — possibly a small vessel, a mountain label, or both.",body:"Like all medieval world maps, the Higden map was also a biblical timeline. Major events from the Old Testament — the Flood, the Tower of Babel, the Exodus — were assigned geographic locations. The map was as much a sacred history as a geographic document."}],
+    links:[{label:"Digital Viewing (British Library manuscript, Royal MS 14 C IX)",url:"https://www.bl.uk/manuscripts/FullDisplay.aspx?ref=Royal_MS_14_C_IX"},{label:"Print-Optimized Reference (Oxford, Bodleian Library image)",url:"https://digital.bodleian.ox.ac.uk/objects/a7fe1f21-a97f-4d47-a6cd-b00c3be86c9a/"}]},
+
+  { vol:"Volume I — Medieval & Early Modern World", title:"The Catalan Atlas — 1375", sub:"Abraham Cresques · Greatest Medieval Map of the World",
+    bio:`Abraham Cresques (1325–1387) was a Jewish master cartographer, instrument-maker, and illuminator from Palma, Majorca, then part of the Crown of Aragon. Working alongside his son Jehuda Cresques, he is credited with creating the Catalan Atlas of 1375 — widely described as the greatest medieval map of the world and the zenith of medieval mapmaking. He served as official mapmaker to the King of Aragon, uniquely positioned as a Jewish scholar with fluency in Catalan, Hebrew, and Arabic, enabling him to synthesize knowledge from Christian, Jewish, and Islamic geographic traditions.`,
+    facts:["The Catalan Atlas was commissioned by Prince John of Aragon as a royal gift for his cousin, who would become King Charles VI of France. Cresques and his son were paid 150 Aragonese gold florins and 60 Mallorcan pounds for their work — a significant sum that reflects the atlas's status as a luxury diplomatic object.","The atlas consists of six vellum leaves, richly painted with expensive pigments, gold, and silver. The first two leaves contain cosmographic, astronomical, and astrological texts; the remaining four comprise the map itself, stretching nearly 10 feet wide when fully unfolded. It is now held by the Bibliothèque nationale de France in Paris (Ms. Espagnol 30).","The Catalan Atlas was the first known map to incorporate an ornate compass rose and was the first atlas to synthesize the navigational precision of portolan charts with the encyclopedic breadth of medieval mappae mundi, essentially inventing the concept of the illustrated world atlas.","Cresques incorporated knowledge from Marco Polo's travels in Asia, the voyage accounts of Sir John Mandeville, and Arabic-Islamic geographic sources, giving the atlas an extraordinary depth of coverage from the Atlantic to the China Sea.","After the 1391 anti-Jewish riots in Spain, Jehuda Cresques was forcibly converted to Christianity and later moved to Portugal, where he may have influenced the Portuguese school of navigation under Prince Henry the Navigator — creating a direct line between the Catalan Atlas tradition and the Age of Exploration."],
+    pois:[{num:"POI #1",title:"Mansa Musa, Emperor of Mali",look:"In the interior of West Africa, find a richly illustrated seated figure wearing a crown and holding a golden orb in one hand, extending a gold nugget or coin toward a turbaned camel rider. He sits on a golden throne.",body:"This is Mansa Musa, ruler of the Mali Empire (r. 1312–1337), whose 1324 pilgrimage to Mecca became legendary when he distributed so much gold in Cairo that he caused severe inflation throughout Egypt for over a decade. Cresques's depiction transformed Africa from a blank margin into a wealthy, powerful realm."},{num:"POI #2",title:"The First Ornate Compass Rose",look:"Find a large, ornate starburst or circular design in one of the sea areas — the first decorative compass rose ever depicted on a map. It radiates lines in multiple directions across the ocean.",body:"The Catalan Atlas contains the first known ornate compass rose in cartographic history, transforming a navigational tool into a work of art. This innovation merged the scientific precision of portolan charts with the decorative richness of illuminated manuscripts."},{num:"POI #3",title:"Marco Polo's Asia",look:"In the eastern panels of the atlas, look for a detailed depiction of India, China (labeled Cathay), and the Silk Road cities, populated with small illustrations of rulers, elephants, and text captions drawn from Marco Polo's accounts.",body:"Cresques drew heavily on Marco Polo's Travels for his depiction of Asia, making the Catalan Atlas one of the first European maps to incorporate Polo's first-hand geographic accounts. The result was the most detailed and geographically ambitious depiction of Asia produced in medieval Europe up to that point."},{num:"POI #4",title:"The Camel Caravans of the Sahara",look:"Across the Sahara desert region in north-central Africa, look for small illustrations of camel caravans — strings of camels carrying goods, guided by turbaned figures — crossing the sandy terrain.",body:"These caravans represent the trans-Saharan gold and salt trade that made West African empires like Mali fabulously wealthy. The caravans connected the gold mines of West Africa with the Mediterranean world, and Europeans were acutely aware that controlling or accessing these routes could determine economic supremacy."},{num:"POI #5",title:"The 'Three Kings' and the Eastern Magi",look:"In Asia — possibly in the region corresponding to Persia or Central Asia — look for a group of crowned or robed figures, possibly on horseback, identified in captions as the biblical Magi (the Three Kings or Wise Men).",body:"The inclusion of the Magi's homeland reflected the medieval European fascination with Eastern Christianity and the legendary Prester John — a mythical Christian king supposedly ruling in the East."},{num:"POI #6",title:"The Coastal Cities of Spain and the Iberian Peninsula",look:"On the western panels (leftmost leaves), trace the coastline of the Iberian Peninsula — Spain and Portugal — looking for densely labeled coastal cities shown as small tower symbols or colored rectangles, with flags identifying Christian and Muslim territories.",body:"The level of detail on the Iberian and Mediterranean coastlines reflects the portolan tradition at its finest — these were working navigational charts for Mediterranean sailors and merchants."},{num:"POI #7",title:"The Astronomical and Cosmological Panels",look:"On the first two leaves (far left) of the atlas, look for circular diagrams filled with text and illustrations, surrounded by figures representing the zodiac, the moon phases, or planetary spheres.",body:"These opening panels represent a complete cosmographic system — the medieval understanding of time, the heavens, and the structure of the universe. By beginning with the cosmos and ending with the known world, Cresques framed geography within the larger divine order."}],
+    links:[{label:"Digital Viewing (Bibliothèque nationale de France, Gallica — full high-resolution)",url:"https://gallica.bnf.fr/ark:/12148/btv1b55002481n"},{label:"Print-Optimized Reference (Smarthistory scholarly essay with panel images)",url:"https://smarthistory.org/catalan-atlas/"}]},
+
+  // VOL II ──────────────────────────────────────────────────────────────
+  { vol:"Volume II — Renaissance & Early Modern World", title:"Map of Imola — 1502", sub:"Leonardo da Vinci · World's Oldest Surviving Ichnographic City Map",
+    bio:`Leonardo da Vinci (1452–1519) was the quintessential Renaissance polymath — painter, sculptor, architect, anatomist, engineer, and scientist. Born in Vinci, near Florence, he rose to fame under the patronage of Ludovico Sforza of Milan and later served as chief military architect and engineer to the notorious Cesare Borgia, in which capacity he created the masterpiece of scientific mapmaking known as the Plan of Imola.`,
+    facts:["In August 1502, Leonardo was appointed General Architect and Engineer to Cesare Borgia. Borgia needed a detailed, accurate plan of his new city for military strategy and administrative control, and tasked the 50-year-old Leonardo with creating it. The map was produced between his completion of The Vitruvian Man and the painting of the Mona Lisa.","Leonardo physically walked every street of Imola, taking measurements with a hodometer (a wheel-based distance-measuring device he had recently developed) and taking compass bearings from the tower of the Palazzo Comunale. The map was laid out using polar coordinates — a geometric technique producing a true overhead or 'ichnographic' view, one of the first of its kind in European cartography.","The map is remarkable for its accuracy: historians have confirmed that it can still be used to navigate the streets of Imola today, more than 520 years after it was drawn. Contemporary maps of cities used oblique, artistic perspectives that were decorative but useless for navigation.","Drawn with chalk, ink, and wash on paper, the map measures approximately 44 x 60 cm. It is divided into eight compass sectors, and in the margins Leonardo recorded distances and directions to neighboring towns in his characteristic mirror writing. The original is held in the Royal Collection at Windsor Castle (RCIN 912284).","The Imola Plan is considered the world's oldest surviving ichnographic city map — a true 'bird's-eye view' plan where all features are rendered to accurate scale from directly overhead — the standard format used in all city planning and architectural mapping today."],
+    pois:[{num:"POI #1",title:"The Eight Compass Points on the Circular Border",look:"Around the outer ring of the map, look for eight evenly spaced points where four straight lines cross the circular boundary of the city. At each point, Leonardo has written the name of a wind direction in his own handwriting.",body:"This compass ring was Leonardo's revolutionary contribution to city mapping — rather than orienting buildings pictorially, he aligned the entire plan to true compass bearings. This meant the map could be physically used on the ground, with a compass, to navigate any street in Imola."},{num:"POI #2",title:"The Rocca Sforzesca Fortress",look:"On the left (western) side of the circular city plan, look for a large square or rectangular structure that projects into the moat — a prominent fortified complex with thick walls set apart from the urban street grid.",body:"The Rocca Sforzesca was the military stronghold of Imola, originally built by Galeazzo Sforza in the 1470s and later the residence of the famous Countess Caterina Sforza, whom Cesare Borgia had recently defeated and captured. For Borgia, understanding the layout of this fortress was a core purpose of commissioning the map."},{num:"POI #3",title:"The City Moat and Circular Wall",look:"Trace the clear circular boundary of the city itself — a defensive ring wall surrounded by a moat or water channel, separating the urban core from the agricultural land and approach roads visible beyond.",body:"Imola was a heavily fortified medieval city, and its circular wall system was a classic example of late medieval defensive architecture. Cesare Borgia's plans for Imola included improvements to these fortifications, and Leonardo was specifically empowered to order military improvements as well as to survey."},{num:"POI #4",title:"The Santerno River at the Bottom",look:"At the bottom edge of the circular map, look for a sinuous, free-flowing curve representing the Santerno River — noticeably more fluid and organic than the sharp geometric lines of the streets above it.",body:"In a map otherwise defined by mathematical precision and straight angles, Leonardo allowed himself one artistic indulgence: the river is drawn as a naturally flowing form, reflecting his deep observation of water in motion."},{num:"POI #5",title:"The Street Grid and Block Structure",look:"Look at the interior of the city for the irregular street grid — a network of lanes and blocks that does not follow a regular Roman grid but meanders organically, reflecting centuries of medieval urban growth.",body:"The irregularities in the street plan were deliberately preserved by Leonardo because he was recording reality, not idealism. This fidelity to observed fact rather than idealized convention was the philosophical breakthrough that made the Imola plan a turning point in Western cartography."},{num:"POI #6",title:"The Palazzo Comunale Tower at the Center",look:"Near the center of the map, find the main civic building — the Palazzo Comunale (Town Hall) — identifiable as one of the prominent labeled structures at or near the central crossroads of the city.",body:"Leonardo took his primary compass bearings from the tower of the Palazzo Comunale, using it as the geometric anchor point for the entire plan. This method — establishing a fixed reference point and mapping outward by compass and measured distance — anticipated the triangulation techniques used in modern surveying."}],
+    links:[{label:"Digital Viewing (Royal Collection Trust, Windsor — high resolution zoom)",url:"https://www.rct.uk/collection/912284/a-map-of-imola"},{label:"Print-Optimized Reference (National Geographic article with full image)",url:"https://www.nationalgeographic.com/history/history-magazine/article/leonardo-da-vinci-transformed-mapping-art-science"}]},
+
+  { vol:"Volume II — Renaissance & Early Modern World", title:"Universalior Cogniti Orbis Tabula — 1507", sub:"Johannes Ruysch · Second Oldest Printed Map to Depict the New World",
+    bio:`Johannes Ruysch (c. 1460–1533) was a Flemish-born explorer, Benedictine monk, astronomer, manuscript illuminator, painter, and cartographer from Utrecht. He is believed to have participated in at least one transatlantic voyage to the New World in the late 1490s — possibly accompanying John Cabot's 1497 expedition to Newfoundland — before eventually settling in Rome, where he befriended Raphael and was commissioned by Pope Julius II to create his groundbreaking world map of 1507.`,
+    facts:["The Ruysch Map was published in Rome in 1507–1508 as part of a new edition of Ptolemy's Geographia. It is the second oldest known printed map to depict the New World, preceded only by the Contarini-Rosselli map of 1506. Scholars have identified 64 surviving examples, making it the most broadly influential early printed depiction of the Americas.","The map was engraved on a distinctive fan-shaped coniform (equidistant conic) projection, placing the Atlantic Ocean at its center rather than at the edge — a radical departure from Ptolemaic tradition.","In accordance with Columbus's own convictions, Ruysch depicted North America as a protrusion of the Asian continent rather than a separate landmass. South America appears as a large separate body labeled Mundus Novus (adopting Amerigo Vespucci's term).","The map is the first printed world map to show a partial depiction of the American coastline based on multiple voyage reports, including Columbus, Cabot, and possibly Vespucci.","Ruysch included a remarkable note on the map explaining why he had left a blank space in the North Atlantic where other maps showed the legendary islands of Antillia — because no navigator had confirmed they existed."],
+    pois:[{num:"POI #1",title:"The Fan-Shaped Projection",look:"Step back and look at the overall shape of the map — rather than a rectangle or oval, the entire world is depicted within a fan or wedge shape, narrowing toward the top (the North Pole) and spreading wide at the equator.",body:"The coniform (equidistant conic) projection was Ruysch's key cartographic innovation. By placing the Atlantic at the center of the fan, he made the connections between Europe, Africa, and the new western lands visually immediate and navigationally legible."},{num:"POI #2",title:"North America Attached to Asia",look:"In the far upper-left portion of the map, find a landmass labeled 'Terra Nova' or similar — connected to the Asian landmass on the right side of the map rather than separated from it.",body:"Ruysch followed Columbus's dying conviction that the lands reached by sailing west were the eastern coast of Asia. This geographic error, shared by most European mapmakers in 1507, would persist in various forms for decades even as evidence mounted that the Americas were an entirely separate continent."},{num:"POI #3",title:"South America — Mundus Novus",look:"In the lower-left portion of the map, find a large landmass labeled 'Mundus Novus' or similar — shown as separate from Asia and from the North American landmass.",body:"By labeling South America 'Mundus Novus' (New World), Ruysch adopted Amerigo Vespucci's revolutionary argument that Columbus had not reached Asia but an entirely new continent unknown to the ancients."},{num:"POI #4",title:"The Missing Antillia Islands",look:"In the North Atlantic area — between Europe and North America — notice the absence of the legendary islands of Antillia or 'Brasil' that appeared on many earlier charts.",body:"Ruysch wrote directly on his map that he had removed these legendary islands because no navigator had confirmed their existence. This methodological commitment to empirical evidence over tradition marks the Ruysch map as an early example of scientific skepticism applied to geography."},{num:"POI #5",title:"The Indian Ocean and Africa's Southern Tip",look:"On the right side of the map, find the continent of Africa — its southern tip shown as rounded and navigable, with the Indian Ocean open to the east and south.",body:"Ruysch's Africa reflects the Portuguese discoveries that had transformed European geographic knowledge: Bartolomeu Dias had rounded the Cape of Good Hope in 1488, and Vasco da Gama had sailed to India in 1498."}],
+    links:[{label:"Digital Viewing (Harvard Map Collection)",url:"https://curiosity.lib.harvard.edu/world-maps/catalog/46-990099737800203941"},{label:"Print-Optimized Reference (Wikipedia with full analysis)",url:"https://en.wikipedia.org/wiki/Ruysch_map"}]},
+
+  { vol:"Volume II — Renaissance & Early Modern World", title:"Map of Utopia — 1518", sub:"Ambrosius Holbein · The Island of Nowhere",
+    bio:`Ambrosius Holbein (c. 1494–c. 1519) was a German painter and woodcut engraver, the elder brother of the more famous Hans Holbein the Younger. Working in Basel in the early sixteenth century, he produced the woodcut illustrations for the 1518 Froben edition of Thomas More's Utopia, including the famous map of the fictional island — the only cartographic image of a place that, by its author's own definition, does not and cannot exist.`,
+    facts:["Thomas More's Utopia was first published in Latin in 1516 without illustrations. The 1518 Basel edition published by Johann Froben was the first to include woodcut images, including the famous map engraved by Ambrosius Holbein. This is the map that established the visual tradition of Utopia as a crescent-shaped island.","The word 'Utopia' was coined by More from the Greek 'ou-topos' (no-place) — a pun on 'eu-topos' (good-place). By giving this imaginary island a map, Holbein and More played an elaborate cartographic joke: creating a navigable chart to an island whose very name declares it does not exist.","The map shows a crescent-shaped island with 54 cities (representing the 54 counties of England at the time), harbors, a central lake, and surrounding seas. Ships are shown approaching and departing, giving the map the visual vocabulary of a working portolan chart — applied to pure fiction.","In the lower foreground of the map, two figures are depicted: the traveler Raphael Hythloday (whose surname means 'expert in nonsense' in Greek) pointing to the island, and a young man who listens. This frame device makes the map a commentary on the act of reading — and on the dangerous appeal of imagining better worlds.","The Utopia map has been interpreted as both a humanist critique of English society and as a sophisticated literary game. Its cartographic format borrowed authority from the real maps of newly discovered lands — including the Americas — to make fictional social commentary feel as substantial and discoverable as a New World island."],
+    pois:[{num:"POI #1",title:"The Crescent Shape of the Island",look:"Look at the overall outline of Utopia — a curved, crescent or horseshoe shape, with the open end facing toward the viewer and harbors at either tip of the crescent.",body:"The crescent shape is both practical and symbolic. Practically, it creates a protected inner harbor (labeled Ostium Anydri — the mouth of the Anydrus river). Symbolically, the crescent echoes the shape of England as More imagined it might have been if cut off from the continent — a better, isolated version of his homeland."},{num:"POI #2",title:"The 54 Cities of Utopia",look:"Look across the island for small labeled city symbols — compact, regular, evenly spaced settlements distributed across the island's interior. Count them if you can — there should be approximately 54.",body:"The 54 cities correspond to the 54 counties of Tudor England, making Utopia a mirror image of More's homeland — but with cities that are all equally sized, equally wealthy, and equally governed."},{num:"POI #3",title:"Raphael Hythloday Pointing to the Island",look:"In the lower margin or foreground of the map, find a standing figure gesturing toward the island — this is Raphael Hythloday, the fictional narrator of Utopia who claimed to have visited it.",body:"Hythloday's name in Greek means 'expert in nonsense,' a clue More embedded in plain sight for his humanist readers. By placing the narrator in the cartouche of the map, Holbein made the map a self-referential joke: here is the man who will tell you about the place that doesn't exist, pointing to the map of it."},{num:"POI #4",title:"Ships Approaching the Harbor",look:"In the waters surrounding the island, find small woodcut ships — some approaching, some departing — navigating the seas around Utopia as though it were a real island on a real portolan chart.",body:"The ships are the map's most powerful rhetorical device. By placing working vessels in Utopian waters, Holbein made Utopia feel navigable and real. In 1518, ships like these had recently discovered the Americas. For More's readers, the existence of Utopia was no more implausible than the existence of the New World had seemed twenty years earlier."},{num:"POI #5",title:"The Anydrus River and Central Lake",look:"In the interior of the island, look for a river flowing from a central body of water toward the harbor mouth — labeled the Anydrus (meaning 'without water' in Greek — another Morean joke).",body:"The Anydrus river system is More's hydrological blueprint for Utopia's agricultural self-sufficiency. The Greek name is a pun: a river that is 'without water' is as paradoxical as an island that is 'no place.' More embedded his humanist wordplay into the geography itself."}],
+    links:[{label:"Digital Viewing (British Library — 1518 Froben edition with map)",url:"https://www.bl.uk/collection-items/thomas-mores-utopia"},{label:"Print-Optimized Reference (Wikipedia: Utopia book and maps)",url:"https://en.wikipedia.org/wiki/Utopia_(book)"}]},
+
+  { vol:"Volume II — Renaissance & Early Modern World", title:"Carta Marina — 1539", sub:"Olaus Magnus · Marine Map and Description of the Northern Lands",
+    bio:`Olaus Magnus (1490–1557) — born Olof Mänsson in Linköping, Sweden — was a Swedish Catholic archbishop, ecclesiastical diplomat, geographer, and historian whose long years of exile in Rome and Venice produced two towering contributions to human knowledge: the Carta Marina of 1539 and the encyclopedic Historia de Gentibus Septentrionalibus (A History of the Northern Peoples, 1555). Dispatched to Rome on a diplomatic mission for the Swedish Crown in 1523, he never returned home, as Sweden's conversion to Lutheranism made a Catholic bishop's homecoming politically impossible.`,
+    facts:["Printed in Venice in 1539 from nine large woodblocks, the assembled map measures approximately 1.7 meters wide by 1.25 meters tall — the largest printed map of any part of Europe at the time. Magnus borrowed 440 ducats to cover printing costs. Only two original copies survive: one at the Bavarian State Library in Munich and one at Uppsala University Library in Sweden.","The Carta Marina was the first large-scale map to give reasonably accurate coastlines and detailed place names to Scandinavia, Finland, Iceland, Greenland, and the Baltic region.","The map's famous sea monsters — over 40 distinct creatures labeled with letters keyed to a margin legend — were not purely decorative. Magnus presented them as genuine natural history, based on sailor testimony. Several clearly derive from real animals: the walrus, the orca, the whale, and the giant squid.","Magnus supplemented the Carta Marina with the Historia de Gentibus Septentrionalibus (1555), an 850-page encyclopedia of northern culture, nature, climate, and history. Translated into Italian, German, English, and Dutch, it served as the primary European authority on Scandinavia for over 200 years.","The map includes one of the earliest cartographic depictions of the whirlpool Maelstrom (labeled Horrenda Caribdis), described as capable of sucking ships to their destruction — a legend that would inspire Edgar Allan Poe's 'A Descent into the Maelström' and Jules Verne's Twenty Thousand Leagues Under the Sea."],
+    pois:[{num:"POI #1",title:"The Great Sea Serpent",look:"In the Norwegian Sea west and northwest of the Norwegian coastline, look for a massive serpentine creature labeled with a letter in the margin key — a dragon-like head, enormous coiling body, and a sailing ship dwarfed by its scale.",body:"Magnus described this creature in his Historia as a great sea serpent 200 feet long and 20 feet wide, living in caves along the Norwegian coast. Magnus's detailed depiction spread the image across European cartography. Map-makers from Ortelius to Blaeu copied this creature, giving it a 150-year cartographic life."},{num:"POI #2",title:"The Maelstrom (Horrenda Caribdis)",look:"Off the northwestern coast of Norway, near the islands of the Lofoten archipelago, look for a circular whirlpool symbol labeled in Latin, often accompanied by a small ship being drawn toward the vortex.",body:"Magnus labeled this fearsome whirlpool after the Greek Charybdis — the mythological monster-whirlpool of Homer's Odyssey. The real Moskstraumen tidal race at the Lofoten Islands is one of the world's strongest. This image directly inspired Poe, Verne, and generations of adventure writers."},{num:"POI #3",title:"Mount Hekla in Iceland",look:"On the large island of Iceland in the upper-left area of the map, look for a mountain with flames or smoke erupting from its peak — the only actively erupting volcano depicted on a European map of this era.",body:"Mount Hekla was believed throughout the Middle Ages and Renaissance to be an entrance to Hell. Magnus depicted it accurately as an active volcano, but the image simultaneously reinforced centuries of supernatural legend."},{num:"POI #4",title:"Scenes of Reindeer Sledding and Snowshoe Hunting",look:"On the Scandinavian landmass — particularly in the northern regions labeled Lapland and Finnmark — look for small figures of people on snowshoes, hunters in winter gear, and reindeer pulling sleds.",body:"These are among the earliest detailed European depictions of Sámi and Lappish culture, drawn from Magnus's direct personal observation during his travels across northern Sweden before 1517."},{num:"POI #5",title:"The Polar Bear on an Ice Floe",look:"In the open Arctic waters north of Iceland or Norway, find a white bear depicted standing on a floating ice sheet, isolated in the sea.",body:"Polar bears had occasionally appeared in medieval European royal collections as exotic gifts from Norse Greenland, but their depiction on a geographic map — with accurate geographic placement — was unprecedented. Magnus placed the polar bear at the northern edge of the charted world."},{num:"POI #6",title:"The Whaling Scene",look:"In the open North Atlantic or Norwegian Sea, look for an illustration of a large whale being hunted — possibly with small boats, harpoons, and the whale blowing a spout of water.",body:"Whaling was among the most economically important activities in the North Atlantic world. The Basques, Norwegians, and Icelanders had developed whaling into a sophisticated practice centuries before it became the global industry of the 17th and 18th centuries."},{num:"POI #7",title:"The Margin Monster Key",look:"At the lower left or right edge of the map, find a block of text containing numbered or lettered entries corresponding to the sea creatures shown in the ocean areas — a reference key that names and briefly describes each monster.",body:"This key transformed the Carta Marina from an illustrated curiosity into a pseudo-scientific natural history document. By assigning each creature a letter and a name, Magnus gave his monsters the scholarly apparatus of a taxonomic catalog. Subsequent cartographers who copied the images also copied the key references, spreading Magnus's marine zoology across European cartographic tradition as authoritative fact for more than a century."}],
+    links:[{label:"Digital Viewing (Uppsala University Library — all nine sheets, zoomable)",url:"https://www.ub.uu.se/find-and-order/carta-marina/"},{label:"Print-Optimized Reference (University of Minnesota, James Ford Bell Library — full color)",url:"https://umedia.lib.umn.edu/item/p16022coll184:7550"}]},
+
+  { vol:"Volume II — Renaissance & Early Modern World", title:"Septentrionalium Terrarum — 1606", sub:"Mercator & Hondius · Polar Projection of the Arctic",
+    bio:`The Septentrionalium Terrarum descriptio is a circular polar projection map of the Arctic regions first produced by Gerardus Mercator in 1595 for his posthumous Atlas and reprinted by the Amsterdam publisher Jodocus Hondius in 1606 in his expanded edition of the Mercator Atlas. Mercator (1512–1594), the Flemish cartographer who gave his name to the cylindrical projection still used today, created this striking overhead view of the North Pole based on accounts from Arctic voyagers, classical texts, and his own cosmographic reasoning.`,
+    facts:["The Septentrionalium Terrarum shows the Arctic from above, centered on the North Pole, with four great rivers flowing inward toward a magnetic rock at the pole. This central mountain, the Rupes Nigra (Black Rock), was believed to be the source of Earth's magnetic field.","The map shows four large landmasses surrounding the polar sea, derived from early Arctic voyages and medieval geographical texts. The region labeled 'Pigmei hic habitant' (pygmies live here) reflects the persistence of classical ethnographic traditions in Renaissance geography.","Hondius's 1606 edition added decorative cartouches and updated some geographic details based on more recent Arctic explorations, while preserving Mercator's fundamental polar projection — one of the earliest and most influential depictions of the Arctic from directly above.","The map was widely influential in shaping European understanding of the Arctic through the 17th century, even as actual exploration gradually replaced the mythological elements with surveyed coastlines.","The Mercator-Hondius atlas partnership was one of the most commercially successful publishing ventures in the history of cartography, with their combined atlases appearing in numerous editions and languages throughout the early 17th century."],
+    pois:[{num:"POI #1",title:"The North Pole — Rupes Nigra",look:"At the very center of the circular map, find the North Pole depicted as a large black magnetic rock or island — the Rupes Nigra — surrounded by swirling waters where the four great polar rivers converge.",body:"The Rupes Nigra (Black Rock) was a medieval and Renaissance geographical belief — a massive magnetic mountain at the North Pole that explained compass behavior. Mercator included it on his map based on the Inventio Fortunata, a now-lost 14th-century text describing a Franciscan friar's voyage to the pole."},{num:"POI #2",title:"The Four Arctic Continents",look:"Surrounding the central polar sea, identify four large landmasses separated by the four rivers flowing toward the pole. Each occupies roughly one quadrant of the circular map.",body:"Mercator derived these four polar continents from geographical reasoning and early voyage reports. They represent an attempt to account for the unknown Arctic territories by applying classical theories of geographical symmetry."},{num:"POI #3",title:"The Pygmies Inscription",look:"On one of the Arctic landmasses, find the Latin inscription 'Pigmei hic habitant' — Pygmies live here.",body:"This inscription reflects the survival of classical ethnographic traditions (derived from Pliny the Elder and other Roman authorities) into the Renaissance. By 1606, most educated Europeans recognized these as legends, but the map preserved them as part of its geographic heritage."},{num:"POI #4",title:"The Decorative Cartouche",look:"In the margin or corner of the map, find the decorative cartouche — an ornate frame containing the map's title and Hondius's publication information, embellished with figures, strapwork, and heraldic devices.",body:"Hondius's elaborate cartouche is a masterpiece of late Renaissance decorative engraving. The strapwork, figures, and ornamental framing signaled the quality and authority of the Hondius-Mercator publishing house to buyers across Europe."}],
+    links:[{label:"Digital Viewing (David Rumsey Map Collection — high resolution)",url:"https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~3045~90055"},{label:"Print-Optimized Reference (Wikipedia: Septentrionalium Terrarum)",url:"https://en.wikipedia.org/wiki/Septentrionalium_Terrarum_descriptio"}]},
+
+  { vol:"Volume II — Renaissance & Early Modern World", title:"Mao Kun Map / Zheng He Nautical Chart — pub. 1628", sub:"Zheng He Voyages · Chinese Cartography",
+    bio:`Zheng He (1371–1433 or 1435) was a Chinese Muslim explorer, navigator, and fleet admiral who commanded the largest wooden ships ever built and led seven extraordinary maritime expeditions from China across the Indian Ocean between 1405 and 1433. His fleets — comprising up to 317 ships and 28,000 men at their height — reached Southeast Asia, India, Persia, Arabia, and the East African coast, establishing Chinese diplomatic and commercial presence across the entire Indian Ocean world decades before Portuguese navigators reached the same waters.`,
+    facts:["The Mao Kun map is a strip map — a horizontal scroll of navigational charts — derived from the records of Zheng He's voyages and published by the military official Mao Yuanyi in his encyclopedic work Wubei Zhi (Treatise on Armament Technology) in 1628, almost two centuries after the voyages themselves.","The map is composed of 24 pages of charts that, when assembled, form a continuous strip approximately 20 meters long, showing the sea routes from Nanjing, China, to the East African coast. It reads from right to left, with China at the right end and Africa at the left.","The map uses a distinctive Chinese cartographic convention: rather than showing geography from above in a plan view, it depicts the coastlines as they would appear to a navigator on a ship — from sea level, with landmarks shown in profile view.","The charts include compass bearings (called 'star positions'), estimated travel times between ports, depth soundings, and hazard warnings — the full suite of navigational information required for deep-ocean voyaging.","Zheng He's voyages were abruptly discontinued after 1433 by imperial decree, and the detailed records of the expeditions were reportedly ordered destroyed. The survival of the Mao Kun charts, published nearly 200 years later from surviving fragments, makes them one of the most historically precious documents in the history of Asian cartography."],
+    pois:[{num:"POI #1",title:"The Strip Map Format",look:"Look at the overall shape of the map — rather than a rectangular or oval world view, it is a long horizontal strip. Orient yourself by finding China at the right end and tracking the route westward toward Africa at the left.",body:"The strip map format reflects the practical purpose of the Mao Kun charts: these were navigational tools for pilots on actual voyages. The route unrolls as you travel it — you always know where you are in the journey relative to where you've been and where you're going."},{num:"POI #2",title:"The Profile-View Coastlines",look:"Rather than the bird's-eye plan view of European maps, look at how the coastlines and landmarks are depicted — as profiles, showing how they would look to a sailor approaching from the sea. Mountains appear as triangular peaks; headlands are shown in silhouette.",body:"The profile-view convention was the dominant Chinese cartographic tradition for navigational charts. A navigator using the Mao Kun charts could match the drawn profile of a coastline with what he actually saw from his ship's deck."},{num:"POI #3",title:"The Compass Bearings (Star Positions)",look:"Look for notations between chart sections listing compass directions — written in classical Chinese using a system of 24 compass points (based on the 24 solar terms), sometimes called 'star positions.'",body:"The Mao Kun compass system divided the horizon into 24 points rather than the European 32 points, reflecting the independent development of Chinese navigational science. The precision of these bearings has been tested against modern GPS reconstructions."},{num:"POI #4",title:"The East African Coast",look:"At the far left end of the strip map, look for the labeled African coastlines — port cities that Zheng He's fleets actually visited, including areas corresponding to modern Kenya, Tanzania, and possibly further south.",body:"The East African section represents the furthest documented reach of Zheng He's voyages. Chinese fleets were trading with East African ports — bringing back exotic animals including giraffes — sixty years before Vasco da Gama rounded the Cape of Good Hope from the opposite direction."}],
+    links:[{label:"Digital Viewing (Wikipedia: Mao Kun map — assembled strip view)",url:"https://en.wikipedia.org/wiki/Mao_Kun_map"},{label:"Reference (James Ford Bell Library Map Portal, UMN)",url:"https://www.lib.umn.edu/collections/special/bell/maps"}]},
+
+  { vol:"Volume II — Renaissance & Early Modern World", title:"Hereford Mappa Mundi — c. 1300", sub:"Richard of Haldingham · Greatest Surviving Medieval World Map",
+    bio:`The Hereford Mappa Mundi (c. 1300) is the largest surviving medieval world map, drawn on a single sheet of calf vellum measuring 163 x 137 cm, and is now preserved in Hereford Cathedral in England where it has been kept for over 700 years. It is generally attributed to Richard of Haldingham and Lafford (also known as Richard de Bello), a clergyman who held posts at Lincoln Cathedral and later at Hereford.`,
+    facts:["The map measures 163 x 137 cm and contains over 500 drawings of cities, 15 biblical events, 33 plants and animals, 32 peoples of the world, and over 1,000 place names and legends in Latin. The entire surface is packed with geography, theology, natural history, ethnography, and classical mythology coexisting in a single image.","Like all medieval mappae mundi, it is oriented with East at the top. Jerusalem sits at the center, the Garden of Eden appears at the very top, and Christ in Judgment sits above the circular world, holding a globe and flanked by angels.","In 1988, Dean Meryl Ffinch of Hereford Cathedral controversially proposed selling the map at Sotheby's to fund cathedral repairs. A public campaign succeeded in keeping it in England. It is now one of UNESCO's 'Memory of the World' documentary heritage items.","The Hereford map includes a self-portrait of the cartographer in the lower left corner — a man on horseback being greeted by a figure, with an inscription asking viewers to pray for Richard of Haldingham. This personal inscription is extraordinarily rare in medieval cartography.","The map's depiction of Britain is notable for its relative accuracy compared to distant lands — local knowledge was always strongest, and the British Isles, closest to home, are rendered with more care than Africa or Asia."],
+    pois:[{num:"POI #1",title:"Christ in Judgment at the Top",look:"At the very top of the map, above the circular world, find the figure of Christ in Majesty — seated on a throne, showing his wounds, with angels on either side and the blessed and damned being sorted.",body:"The Last Judgment frame around the top of the Hereford map declares its purpose: this is not merely a geographic document but a theological one. The entire map is a meditation on sacred history from the Garden of Eden to the End of Time."},{num:"POI #2",title:"Jerusalem at the Center",look:"Find the circular walled city at the absolute center of the map — this is Jerusalem, depicted as the spiritual navel of the world, with specific sacred sites labeled within its walls.",body:"Jerusalem's central placement on the Hereford map is one of the most powerful statements in the history of cartography: the entire known world is organized around this single city."},{num:"POI #3",title:"The Garden of Eden",look:"At the very top of the circular world map (the eastern extremity), find a rounded enclosure with trees, rivers, and the figures of Adam and Eve — this is the Garden of Eden, placed at the edge of the known world.",body:"Medieval cartography placed Eden at the East because the Bible placed it 'in the East,' and East was the sacred direction of Paradise, the sunrise, and the resurrection. The four rivers flowing from Eden were traced across the map as real geographic features."},{num:"POI #4",title:"The Monstrous Races",look:"Along the outer edges of the map, particularly in Africa and Asia, look for illustrations of fantastical human figures — people with faces in their chests (Blemmyae), one-legged men (Sciapods), dog-headed people (Cynocephali).",body:"The monstrous races of the Hereford map come from classical sources — principally Pliny the Elder's Natural History. They populated the edges of the known world because, in medieval thinking, the farther you traveled from Jerusalem, the stranger and more dangerous the world became."},{num:"POI #5",title:"The Self-Portrait of the Cartographer",look:"In the lower-left corner of the map, outside the main circular world, find a small scene showing a man on horseback being greeted by a standing figure — this is the cartographer Richard of Haldingham, who inscribed a request for prayers.",body:"Richard of Haldingham's self-portrait is extraordinarily rare in medieval cartography — most medieval maps are anonymous. His inscription asks viewers to pray for his soul, revealing the deeply personal and devotional nature of creating such a map."}],
+    links:[{label:"Digital Viewing (Hereford Cathedral — official interactive map explorer)",url:"https://www.themappamundi.co.uk/"},{label:"Print-Optimized Reference (British Library — Mappa Mundi overview)",url:"https://www.bl.uk/the-middle-ages/articles/maps-of-the-known-world"}]},
+
+  // VOL III ──────────────────────────────────────────────────────────────
+  { vol:"Volume III — Late Medieval & Age of Discovery", title:"Carta Marina — 1539 (Vol. III)", sub:"Olaus Magnus · Sea Monsters, Ethnography & Legacy",
+    bio:`This is the Volume III treatment of the Carta Marina by Olaus Magnus. For the full cartographer biography, see the Volume II entry. Volume III focuses on complementary details not covered in Volume II, particularly regarding the sea monsters, Scandinavian ethnographic details, and the map's legacy in European cartography. NOTE: The Carta Marina appears in both Volume II and Volume III. Both entries are self-contained and complement each other.`,
+    facts:["Olaus Magnus spent twelve years in exile preparing the Carta Marina, drawing on personal travels, sailor accounts, classical texts, and contemporary voyage reports. The map represented the accumulated geographic knowledge of a lifetime dedicated to documenting northern Europe.","The full title — Carta Marina et Descriptio Septentrionalium Terrarum — announces its dual ambition: a navigation chart AND a description of the northern lands. It was simultaneously a working sailor's tool and an encyclopedic reference work.","Magnus borrowed 440 ducats to fund the printing — a debt that reflected both his dedication to the project and the extraordinary cost of producing a nine-block woodcut map at this scale.","The map's influence was enormous: Abraham Ortelius included it in his Theatrum Orbis Terrarum (1570), Gerardus Mercator drew on it for his own northern maps, and its sea monster illustrations were copied on maps for over 150 years after publication.","Only two original copies of the 1539 Carta Marina survive: one at the Bavarian State Library in Munich (rediscovered in 1886 after being lost for centuries) and one at Uppsala University Library in Sweden. Both are now fully digitized and freely accessible online."],
+    pois:[{num:"POI #1",title:"The Great Sea Serpent (Vol. III Perspective)",look:"In the Norwegian Sea, find the massive sea serpent labeled in the margin key. Note the letter identifying it in the key legend at the margin of the map.",body:"Magnus described the sea serpent based on Norwegian coastal traditions going back to the Vikings. The Stoorworm of Norse mythology — a serpent so vast it could encircle the earth — was the direct ancestor of Magnus's creature. His pseudo-scientific treatment (giving it measurements, a letter designation, and a key entry) transformed mythology into natural history."},{num:"POI #2",title:"The Maelstrom — Horrenda Caribdis (Vol. III Perspective)",look:"Near the Lofoten Islands off the Norwegian coast, find the circular whirlpool labeled Horrenda Caribdis in Latin.",body:"The literary legacy of this image: Edgar Allan Poe's 1841 story 'A Descent into the Maelström' drew directly on Magnus's description. Jules Verne included the Maelstrom in Twenty Thousand Leagues Under the Sea (1870). The real Moskstraumen tidal race — one of the world's strongest — continues to inspire maritime fear today."},{num:"POI #3",title:"The Skiing and Hunting Scenes (Vol. III Perspective)",look:"On the Scandinavian landmass, find the scenes of people hunting on snowshoes and skiing, and note the detail with which Magnus rendered winter activities.",body:"Magnus had personally witnessed Sámi and Swedish winter practices during his travels in northern Sweden before 1517. His depictions are the earliest detailed visual record of these cultures in European print."},{num:"POI #4",title:"The Polar Bear (Vol. III Perspective)",look:"In the Arctic waters north of Scandinavia, find the polar bear standing on an ice floe.",body:"In Vol. III context, the bear also connects to the Norse tradition of the White Bear of the North — a creature associated with the gods, with courage, and with the dangerous beauty of the Arctic. Magnus elevated a real animal into a cartographic symbol."},{num:"POI #5",title:"The Whaling Industry (Vol. III Perspective)",look:"In the North Atlantic waters, find the whaling scene — boats, a harpooned whale, and the spray of a whale's blow.",body:"Basque whalers had been operating in the North Atlantic since at least the 12th century, and by Magnus's time they had established seasonal stations as far west as Labrador. Magnus's whaling scene reflected an industry already global in reach."}],
+    links:[{label:"Digital Viewing (Uppsala University — zoomable all nine sheets)",url:"https://www.ub.uu.se/find-and-order/carta-marina/"},{label:"Print-Optimized Reference (Minnesota Bell Library — full color scan)",url:"https://umedia.lib.umn.edu/item/p16022coll184:7550"}]},
+
+  { vol:"Volume III — Late Medieval & Age of Discovery", title:"Fra Mauro's Map of the World — c. 1450", sub:"Fra Mauro · The Greatest Memorial of Medieval Cartography",
+    bio:`Fra Mauro (c. 1400–1464) was a Camaldolese monk of the Monastery of St. Michael on the island of Murano, just north of Venice, whose official monastic duties as rent-collector and accountant concealed his true vocation: running one of the most sophisticated cartographic workshops in the medieval world. In his youth, before taking monastic vows, he had traveled widely as a soldier and merchant. A commemorative medal struck in his honor describes him as chosmographus incomparabilis — the incomparable cosmographer.`,
+    facts:["The Fra Mauro map is universally described as 'the greatest memorial of medieval cartography,' a circular planisphere drawn on high-quality vellum and set in a gilded wooden frame measuring 2.4 by 2.4 meters (8 by 8 feet). It contains more than 3,000 descriptive texts and hundreds of detailed illustrations rendered in expensive pigments including blue, red, turquoise, green, and gold.","Two original commissions were made. The first was ordered by King Afonso V of Portugal (completed April 24, 1459). This copy was sent to Lisbon with a letter from the Doge of Venice to Prince Henry the Navigator encouraging further exploration; it eventually disappeared from São Jorge Castle sometime after 1494. The surviving copy — made for the Signoria of Venice — is held today in Venice's Museo Correr.","The map is oriented with South at the top — following the Arabic cartographic convention of Muhammad al-Idrisi rather than the Ptolemaic northern-up tradition. Fra Mauro wrote directly on the map: 'I do not think it derogatory to Ptolemy if I do not follow his Cosmographia.'","The map represented a decisive break from medieval theological cartography: Jerusalem is not placed at the center; the Garden of Eden is placed outside the main circle in a corner panel; and the monstrous races are specifically omitted, with Fra Mauro noting that no travelers had ever actually reported seeing them.","The African continent is depicted extending far to the south with an open ocean below it — reflecting early Portuguese reports. This map almost certainly influenced the Portuguese court to intensify exploration of the African coast, leading directly to Bartolomeu Dias's rounding of the Cape of Good Hope in 1488."],
+    pois:[{num:"POI #1",title:"South at the Top — The Inverted Orientation",look:"Step back and orient yourself: look for Europe in the lower half of the circular map, Africa across the top, and Asia to the right. The map is drawn south-up. Find Italy's boot shape in the lower-center area, pointing upward instead of down.",body:"Fra Mauro's choice to orient his map south-up was a conscious rejection of the dominant Ptolemaic north-up convention in favor of the Arabic tradition he found more geographically useful. For a Venetian cartographer whose city thrived on eastern trade, the world made more sense with Africa and Asia prominent at the top."},{num:"POI #2",title:"The Open Tip of Africa",look:"On the upper portion of the map (remember, south is at the top), find the continent of Africa — a large landmass. Notice that its southern tip is shown as a rounded, open cape with open sea below and to both sides.",body:"This is one of the most prophetic details in cartographic history. Every world map based on Ptolemy since the 2nd century CE had shown the Indian Ocean as a closed inland sea. Fra Mauro broke from Ptolemy and drew Africa as a navigable peninsula. Twenty-eight years later, Bartolomeu Dias proved him correct."},{num:"POI #3",title:"Japan — One of the First European Depictions",look:"In the far eastern reaches of the map — the right-hand portion representing Asia — look for an island labeled with something approximating the name of Japan (possibly Cipangu or a variant).",body:"Fra Mauro drew Japan based on Marco Polo's account of Cipangu — the Island of Gold. Its inclusion confirmed Japan's existence as a major Asian island in the geographic consciousness of 15th-century Europe, an awareness that would later motivate Columbus to sail west in search of exactly this island."},{num:"POI #4",title:"Venice and the Venetian Lagoon",look:"In the lower-center of the map — the Italian peninsula area — find the city of Venice, depicted with unusual detail compared to other European cities.",body:"The most accurate area of any cartographer's map is always closest to home. The wealth of trade knowledge that flowed through Venetian merchant networks — from Morocco to Persia, from Russia to sub-Saharan Africa — was the raw material from which the entire map was built."},{num:"POI #5",title:"The Four Corner Panels Outside the Main Circle",look:"At the four corners surrounding the circular main map, look for four smaller diagrams: a Ptolemaic solar system, the four elements, the Garden of Eden, and a diagram of the Earth as a globe.",body:"By placing Eden in a separate corner panel rather than on the earth itself, Fra Mauro made a quiet but revolutionary statement: Paradise is not a geographic location. It is a theological concept. This separation of sacred and physical geography was a philosophical breakthrough."},{num:"POI #6",title:"The 3,000+ Text Annotations",look:"Look across any portion of the map for the dense clusters of handwritten text — tiny inscriptions in Italian and Latin filling every region of the circular image.",body:"Each annotation represents a specific piece of knowledge acquired from a named source — a Venetian merchant, a returning pilgrim, an Ethiopian monk, a Portuguese navigator — and Fra Mauro often identifies his source explicitly as validation. This citation practice was an early example of evidentiary scholarship in European cartography."},{num:"POI #7",title:"The Indian Ocean Trade Route Network",look:"In the central-right portion of the map, find the Indian Ocean — a large body of water shown open at its southern end, populated with labeled islands, coastal cities, and possibly small ship illustrations.",body:"The detail of the Indian Ocean reflects Venice's vital commercial interest in eastern trade routes. Indian Ocean trade — spices from the Moluccas, silk from China, cotton from India, gold from East Africa — flowed through Arab middlemen to Venetian merchants."}],
+    links:[{label:"Digital Viewing (Museo Correr, Venice — interactive high-resolution exploration platform)",url:"https://fra-mauro.it/en/"},{label:"Print-Optimized Reference (Ruderman Rare Maps, full-size facsimile description)",url:"https://raremaps.com/gallery/detail/89395/facsimile-of-the-circa-1450-fra-mauro-mappamundi-mauro"}]},
+
+  { vol:"Volume III — Late Medieval & Age of Discovery", title:"The Catalan Atlas — 1375 (Vol. III)", sub:"Abraham Cresques · Vol. III Treatment",
+    bio:`Abraham Cresques (1325–1387) was a Jewish cartographer, instrument-maker, and manuscript illuminator from Palma, Majorca, a cosmopolitan island where Arabic, Hebrew, and Catalan geographic traditions intersected in a unique scholarly environment. He served as official mapmaker to King Pedro IV of Aragon — who called him "master of world maps and compasses" — and worked alongside his son Jehuda Cresques in a workshop that represented the absolute pinnacle of 14th-century cartographic achievement.`,
+    facts:["The Catalan Atlas was created in 1375 as a diplomatic gift from Prince John of Aragon to his cousin Charles VI of France. The atlas consists of six vellum leaves richly painted with pigments, gold, and silver, stretching nearly 10 feet wide when unfolded. It is now held by the Bibliothèque nationale de France in Paris.","The Catalan Atlas was the first cartographic work to systematically combine the navigational precision of portolan charts with the encyclopedic breadth of medieval mappae mundi — creating the template for the illustrated world atlas. It was the first map to feature an ornate compass rose.","The atlas's depiction of Africa, Asia, and the trade world was unprecedented. West Africa was shown with trans-Saharan gold trade routes; Central Asia with Silk Road cities; China with details drawn from Marco Polo; and the Indian Ocean with a network of named commercial ports.","In 1391, anti-Jewish riots swept across the Crown of Aragon. Jehuda Cresques was forcibly baptized and renamed Jaume Ribes, eventually relocating to Portugal where he may have served as cartographic adviser to the early Portuguese exploration program under Prince Henry the Navigator.","The Catalan Atlas established the tradition of the beautifully illustrated, commercially oriented world atlas through Dulcert, Bianco, Benincasa, and ultimately through the great printed atlases of Ortelius and Mercator."],
+    pois:[{num:"POI #1",title:"Mansa Musa — Emperor of Mali on His Golden Throne",look:"In the interior of West Africa (the lower-left area of the world map panels), find a richly illustrated seated figure wearing a golden crown and holding a gold orb or nugget, extending it toward a turbaned camel rider approaching from the desert.",body:"Vol. III Context: Mansa Musa's inclusion planted the seed of Portuguese interest in sailing south along the African coast to find the source of West African gold. The label refers to him as 'Musse Melly, lord of the Negroes of Guinea' — the most detailed European cartographic acknowledgment of West African power and wealth up to that point."},{num:"POI #2",title:"The First Ornate Compass Rose",look:"In the open sea areas of the map — probably the western Mediterranean — find a large, decorative starburst or circular design with many radiating points, rendered in multiple colors.",body:"Vol. III Context: Earlier portolan charts used simple wind diagrams or plain rhumb-line networks. Cresques transformed the navigational compass into a work of art. Every decorative compass rose on every subsequent map descends from this one."},{num:"POI #3",title:"Marco Polo's Asia and the Silk Road",look:"In the eastern panels of the atlas, find the detailed depiction of Central Asia, India, and China, populated with illustrations of rulers on thrones, elephants, camels, and text references drawn from Marco Polo's accounts.",body:"Vol. III Context: The Catalan Atlas represents the high-water mark of Marco Polo's influence on European cartography. Cresques drew more extensively from the Travels than any previous cartographer."},{num:"POI #4",title:"The Astronomical Opening Panels",look:"On the first two leaves of the atlas, look for circular diagrams showing the phases of the moon, the zodiac, and planetary arrangements.",body:"Vol. III Context: Cresques opened his atlas not with geography but with astronomy, because in the 14th-century understanding of the world, you could not comprehend where you were on earth without understanding your position in the cosmos."},{num:"POI #5",title:"The Three Magi and Eastern Christianity",look:"In the Asian panels, look for a group of crowned or robed figures on horseback identified as the biblical Magi — the Three Kings — traveling westward from their homeland.",body:"Vol. III Context: The inclusion of the Magi reflects the medieval European belief that Eastern Christianity was a living political reality. The legend of Prester John — a mythical Christian king ruling in Asia or Africa — was taken seriously by popes and kings who hoped to find Christian allies in the East."}],
+    links:[{label:"Digital Viewing (Bibliothèque nationale de France, Gallica — full high-resolution all panels)",url:"https://gallica.bnf.fr/ark:/12148/btv1b55002481n"},{label:"Print-Optimized Reference (Smarthistory scholarly essay with annotated panel images)",url:"https://smarthistory.org/catalan-atlas/"}]},
+
+  { vol:"Volume III — Late Medieval & Age of Discovery", title:"The First Map of America — 1500", sub:"Juan de la Cosa · Columbus's Captain",
+    bio:`Juan de la Cosa (c. 1450–1510) was a Castilian-Basque navigator, cartographer, and explorer from Santoña in Cantabria who has the singular distinction of being both the owner-captain of Columbus's flagship Santa María on the 1492 voyage and the maker of the oldest surviving European map to depict the Americas. Over seventeen years he undertook seven Atlantic voyages, sailing with Columbus, Ojeda, Vespucci, and Bastidas. He died on his seventh voyage in 1510, killed by a poisoned arrow near present-day Turbaco, Colombia.`,
+    facts:["The map bears a self-identifying inscription: 'Juan de la Cosa made this in the port of Santa María in the year 1500.' Drawn on two joined sheets of parchment measuring 96 cm high by 183 cm wide, it is a portolan chart in style extending far beyond the Mediterranean to encompass a full world map including the first known cartographic rendering of the American coastlines.","The map is the only known cartographic work made by a direct eyewitness of Columbus's first voyages, incorporating knowledge from Columbus's four voyages, John Cabot's 1497 voyage (shown with the English flag), Alonso de Ojeda's 1499 South American coastal survey, and Pedro Álvares Cabral's 1500 landfall in Brazil.","After being classified as a state secret by the Spanish Crown, the map disappeared for more than 300 years. It resurfaced in a Paris junk shop in 1832. Alexander von Humboldt was the first modern scholar to identify its true significance. The Spanish government purchased it in 1853; it is now in the Museo Naval in Madrid.","The map famously depicts Cuba correctly as an island — contradicting Columbus's dying insistence that Cuba was a peninsula of the Asian mainland. De la Cosa had sailed along Cuba's coast himself and drew it truthfully, taking a definitive stand against the Admiral's geographic conviction.","The region of Central America is covered with a large image of Saint Christopher carrying the Christ child across the water — occupying exactly the area where a passage to the Indian Ocean would need to exist if Columbus's theory were correct."],
+    pois:[{num:"POI #1",title:"The Americas as a Green Landmass",look:"On the left half of the map, find the large area rendered in vivid green — unlike any other region on the map. This is the American continent.",body:"The green color was a deliberate visual choice to communicate the extraordinary fertility and vegetation that Spanish explorers described upon first encountering Caribbean landscapes. Making them literally green communicated this radical otherness to anyone who picked up the chart."},{num:"POI #2",title:"Cuba Drawn as an Island",look:"In the Caribbean area of the map, find the island of Cuba — rendered with some accuracy as a recognizable island shape, completely surrounded by water.",body:"This detail was politically explosive. Columbus had forced his crew to sign sworn affidavits that Cuba was a peninsula of the Asian mainland. De la Cosa, who had sailed along Cuba's coast himself, knew this was false — and drew it truthfully."},{num:"POI #3",title:"Saint Christopher Covering Central America",look:"In the western portion of the Americas, find a large illustration of Saint Christopher — a robed giant carrying the Christ child across a body of water, dominating the area where Central America and any possible passage to Asia would be located.",body:"By placing a saint over the unknown western regions, de la Cosa simultaneously honored Columbus's Christian mission, avoided having to make a geographic claim he could not verify, and left open the possibility that a western passage to Asia might still exist."},{num:"POI #4",title:"Flags of Competing European Crowns",look:"Along the coastal areas of the Americas, look for small national flags or standards — the Castle and Lion of Castile and León for Spanish claims, and the English flag of St. George along the northern coastline.",body:"The flags made this a political document as well as a geographic one. The English flag in the north reflects John Cabot's 1497 voyage to Newfoundland under Henry VII. By showing both Spanish and English claims, the map documented that the race for Atlantic empire was already multi-national in 1500."},{num:"POI #5",title:"The Compass Rose and Rhumb Line Network",look:"At a prominent location in the map — probably the Atlantic Ocean area — find the large compass rose and the radiating network of rhumb lines crossing the entire chart.",body:"Despite its extraordinary subject matter, de la Cosa's map is structured as a working portolan chart. The rhumb line network meant that the chart could, in principle, be used for actual navigation."},{num:"POI #6",title:"The African Cape and Indian Ocean",look:"On the right side of the map, find the triangular southern tip of Africa — the Cape of Good Hope — with the Indian Ocean opening to the east. Look for Portuguese place names along the African east coast.",body:"Vasco da Gama had rounded the Cape of Good Hope in 1498, just two years before this map was made, and de la Cosa incorporated the new Portuguese geographic intelligence almost immediately."}],
+    links:[{label:"Digital Viewing (Google Arts & Culture, Museo Naval Madrid — high resolution story)",url:"https://artsandculture.google.com/story/chart-of-juan-de-la-cosa-the-first-known-map-of-america-fundaci%C3%B3n-museo-naval/CgVBiowwoJqZIQ"},{label:"Print-Optimized Reference (Factum Foundation — 3D-scanned facsimile viewer)",url:"https://factumfoundation.org/our-projects/digitisation/the-spanish-gallery-at-bishop-auckland/the-map-of-juan-de-la-cosa/"}]},
+
+  { vol:"Volume III — Late Medieval & Age of Discovery", title:"The Waldseemüller Map — 1507", sub:"Martin Waldseemüller · America's Birth Certificate",
+    bio:`Martin Waldseemüller (c. 1470–1521) was a German cartographer, humanist scholar, and cosmographer who worked at the Gymnasium Vosagense in Saint-Dié-des-Vosges, in the duchy of Lorraine. Operating in a collaborative scholarly environment funded by Duke René II of Lorraine, he worked alongside the humanist poet Matthias Ringmann and a circle of translators and engravers to produce one of the most consequential cartographic documents in human history.`,
+    facts:["Printed in April 1507 from twelve woodblock sheets, the assembled map measures approximately 4.5 by 8 feet. Of the original 1,000 copies, only one complete example is known to survive today, purchased by the Library of Congress in 2003 for $10 million — the highest price ever paid for a single map.","The map is the first in history to use the name 'America,' placed on what we now call South America. The name honored Amerigo Vespucci, whose letters argued convincingly that the lands Columbus had reached were not the coast of Asia but a 'New World' entirely unknown to the ancients.","The map made two additional world-historical firsts: it was the first map to depict the Americas as a separate hemisphere entirely surrounded by ocean, and it was the first to show a distinct ocean to the west of the Americas — what we now call the Pacific — six years before Balboa first saw it from the Isthmus of Panama.","Curiously, Waldseemüller apparently had second thoughts. His 1513 maps dropped the name 'America' entirely, labeling the same region 'Terra Incognita.' But by then it was too late: the name had been adopted by other cartographers, confirmed by Mercator in 1538, and had become permanent.","The map also contained printed portraits of Ptolemy and Amerigo Vespucci at the top corners — a visual manifesto declaring that a new age of geography had begun. The Library of Congress has called it 'America's birth certificate.'"],
+    pois:[{num:"POI #1",title:"The Word 'AMERICA' on the Southern Continent",look:"In the left-center portion of the map — on the long, narrow landmass that represents South America — look for the single Latin word 'AMERICA' written across the interior of the continent in large capital letters.",body:"This is the most consequential place name in the history of cartography. A continent that had existed for hundreds of millions of years and been inhabited for at least 15,000 years received its European name — in print, for the first time — at this exact location."},{num:"POI #2",title:"The Pacific Ocean — Inferred Before It Was Seen",look:"Between the western coast of the Americas and the eastern coast of Asia, look for an open body of water — a distinct ocean separating the two continents. Note that this ocean is wider than the Atlantic on the map.",body:"The Pacific Ocean was not seen by any European until 1513, six years after this map was printed. Yet here it is, correctly depicted as a distinct ocean wider than the Atlantic. Whether Waldseemüller inferred it from Vespucci's calculations, from undocumented Portuguese intelligence, or from pure geographic logic remains one of the great unsolved mysteries of cartographic history."},{num:"POI #3",title:"Portraits of Ptolemy and Vespucci at the Top",look:"At the very top of the map, in the decorative border panels, find two portrait busts: on the left, an older bearded man holding a T-O diagram — representing Ptolemy — and on the right, a contemporary Renaissance figure holding a navigational instrument — representing Amerigo Vespucci.",body:"This deliberate pairing was Waldseemüller's visual argument for how the new geography worked: Ptolemy provided the mathematical framework; Vespucci provided the empirical observations that extended and corrected it."},{num:"POI #4",title:"North America as Terra Incognita",look:"In the left portion of the map, above the labeled 'America' of South America, find a smaller northern landmass with little interior detail, labeled 'Terra Incognita' (Unknown Land).",body:"Waldseemüller had very little reliable information about North America in 1507 — far less than he had about South America. The depiction of North America is sparse, speculative, and almost blank — a cartographic admission of ignorance that stands in striking contrast to the confident naming of South America directly below it."},{num:"POI #5",title:"The Twelve-Sheet Structure of the Wall Map",look:"Look for the faint lines dividing the map into twelve rectangular sections — the grid of the woodblock printing.",body:"Only one complete copy survived because most purchasers assembled and displayed their maps on walls where they eventually deteriorated. The survival of this single copy — discovered in 1901 in a German castle library, purchased by the Library of Congress in 2003 for $10 million — is itself one of the great stories of cartographic history."},{num:"POI #6",title:"The Strait Separating North and South America",look:"Between the northern and southern American landmasses, look for a narrow water passage — an inferred strait separating what would later be called North and South America.",body:"Waldseemüller depicted a strait separating the two American landmasses — a geographic feature that did not actually exist in the form shown. Ironically, by inventing a separation between the two continents, he was closer to geographic reality than Columbus ever was: North and South America are indeed separate landmasses, joined only by the narrow Isthmus of Panama."},{num:"POI #7",title:"The Old World in the Right Panels",look:"On the right half of the map, find the familiar outlines of Europe, Africa, and Asia — depicted with varying accuracy.",body:"Waldseemüller's Old World was built on the best available Portuguese and Ptolemaic sources of 1507: the Mediterranean is accurate, Africa is well-rendered, and India is recognizable. But Asia becomes increasingly speculative toward the east — the honest cartographic acknowledgment that the full circuit of the globe was not yet understood."}],
+    links:[{label:"Digital Viewing (Library of Congress — official high-resolution interactive viewer, the surviving original)",url:"https://www.loc.gov/item/2003626426/"},{label:"Reference (Library of Congress Map Collections)",url:"https://www.loc.gov/maps/collections/"}]}
+];
+
+// ════ STATE ═══════════════════════════════════════════════════════════
+let currentMapIndex = 0;
+
+// ════ PAGE FUNCTIONS ══════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  updateNavHighlight(id);
+}
+
+function showMap(index) {
+  currentMapIndex = index;
+  const m = maps[index];
+
+  document.getElementById('mc-vol').textContent = m.vol;
+  document.getElementById('mc-title').textContent = m.title;
+  document.getElementById('mc-sub').textContent = m.sub;
+
+  let html = '';
+
+  // Cartographer
+  html += `<div class="section-heading">The Cartographer</div><div class="bio-box">${m.bio}</div>`;
+
+  // Facts
+  html += `<div class="section-heading">Historical Facts About the Map</div><ul class="facts-list">`;
+  m.facts.forEach(f => { html += `<li>${f}</li>`; });
+  html += `</ul>`;
+
+  // POIs
+  html += `<div class="section-heading">Points of Interest — Scavenger Hunt Style</div><div class="poi-grid">`;
+  m.pois.forEach(p => {
+    html += `<div class="poi-card">
+      <div class="poi-label">${p.num}</div>
+      <div class="poi-title">${p.title}</div>
+      <div class="poi-lookfor"><strong>Look for…</strong> ${p.look}</div>
+      <div class="poi-body">${p.body}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Links
+  if (m.links && m.links.length) {
+    html += `<div class="links-box"><h4>Web Links</h4>`;
+    m.links.forEach(l => {
+      html += `<div class="link-entry"><span class="link-label">${l.label}</span><a href="${l.url}" target="_blank" rel="noopener">${l.url}</a></div>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('mc-body').innerHTML = html;
+
+  // Prev / Next labels
+  const prev = document.getElementById('btn-prev');
+  const next = document.getElementById('btn-next');
+  prev.disabled = index === 0;
+  next.disabled = index === maps.length - 1;
+  prev.textContent = index > 0 ? `← ${maps[index-1].title.substring(0,28)}…` : '← Previous';
+  next.textContent = index < maps.length-1 ? `${maps[index+1].title.substring(0,28)}… →` : 'Next →';
+
+  showPage('map-content');
+  updateNavHighlight('map-' + index);
+}
+
+function navMap(dir) {
+  const n = currentMapIndex + dir;
+  if (n >= 0 && n < maps.length) showMap(n);
+}
+
+function showGem(which) {
+  showPage('gem-' + which);
+  updateNavHighlight('gem-' + which);
+}
+
+function openLocal() {
+  var a = document.createElement('a');
+  a.href = 'file:///Users/toddsmith/Desktop/map-history-study-guide.html';
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function updateNavHighlight(activeId) {
+  document.querySelectorAll('.nav-btn, .nav-gem-btn').forEach(b => b.classList.remove('active'));
+  if (activeId === 'gem-maproom') {
+    document.querySelectorAll('.nav-gem-btn')[0]?.classList.add('active');
+  } else if (activeId === 'gem-fiction') {
+    document.querySelectorAll('.nav-gem-btn')[1]?.classList.add('active');
+  } else if (activeId.startsWith('map-')) {
+    const idx = parseInt(activeId.split('-')[1]);
+    const allBtns = document.querySelectorAll('.nav-btn');
+    if (allBtns[idx]) allBtns[idx].classList.add('active');
+  }
+}
+
+function openExhibition() {
+  var a = document.createElement('a');
+  a.href = 'file:///Users/toddsmith/Desktop/map-exhibition%20(1).html';
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+function openApprenticeship() {
+  var a = document.createElement('a');
+  a.href = 'file:///Users/toddsmith/Desktop/map_apprenticeship_complete.html';
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+</script>
+</body>
+</html>
